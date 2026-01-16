@@ -15,19 +15,33 @@ class IsoEntropyFSM:
         self.phase: AgentPhase = AgentPhase.ORIENT
         self.stable_hits: int = 0
 
-    def update(self, collapse_rate: Optional[float]):
+    def update(self, collapse_rate: Optional[float], upper_ci95: Optional[float] = None):
+        """
+        Actualiza la FSM basándose en el colapso y validación estadística.
+        
+        Args:
+            collapse_rate: Tasa de colapso observada
+            upper_ci95: Límite superior del intervalo de confianza de Wilson (95%)
+        """
         if collapse_rate is None:
             return
 
+        stability_threshold = 0.05
+        
+        # Validar estabilidad estadística: colapso < 5% Y UB95 < 5% (si se proporciona)
+        is_statistically_stable = collapse_rate < stability_threshold
+        if upper_ci95 is not None:
+            is_statistically_stable = is_statistically_stable and (upper_ci95 < stability_threshold)
+
         if self.phase == AgentPhase.ORIENT:
-            if collapse_rate < 0.05:
+            if is_statistically_stable:
                 self.phase = AgentPhase.VALIDATE
                 self.stable_hits = 1
             else:
                 self.phase = AgentPhase.ORIENT
 
         elif self.phase == AgentPhase.VALIDATE:
-            if collapse_rate < 0.05:
+            if is_statistically_stable:
                 self.stable_hits += 1
                 if self.stable_hits >= 2:
                     self.phase = AgentPhase.STRESS

@@ -2,6 +2,7 @@
 import os
 import json
 import re
+import math
 from datetime import datetime
 
 import google.genai as genai
@@ -74,6 +75,32 @@ class IsoEntropyAgent:
             return json.loads(text)
         except Exception:
             return {}
+
+    def _calculate_wilson_upper_bound(self, collapses: int, runs: int, confidence: float = 0.95) -> float:
+        """
+        Calcula el límite superior del intervalo de confianza de Wilson (95%).
+        
+        Args:
+            collapses: Número de simulaciones que colapsaron
+            runs: Número total de simulaciones
+            confidence: Nivel de confianza (default 0.95, z=1.96)
+        
+        Returns:
+            float: Límite superior del intervalo de confianza
+        """
+        if runs == 0:
+            return 1.0
+        
+        z = 1.96  # Para 95% CI
+        phat = collapses / runs
+        n = runs
+        
+        denom = 1 + (z**2 / n)
+        centre = phat + (z**2 / (2 * n))
+        adj = z * math.sqrt((phat * (1 - phat) / n) + (z**2 / (4 * n**2)))
+        upper = (centre + adj) / denom
+        
+        return min(1.0, upper)  # Clamp a [0, 1]
 
     def compress_simulation_state(self, experiment_log: list) -> dict:
         """
@@ -452,6 +479,11 @@ Parámetros Físicos Base:
                 self._log(f"\n🧪 EXPERIMENTO #{iteration}: • I={I:.2f}, K={K:.2f}, θ_max={theta:.2f} • Ejecutando 500 simulaciones Monte Carlo...")
                 sim_result = run_simulation(I, K, theta, runs=500)
                 colapso_pct = sim_result["tasa_de_colapso"]
+                collapses_total = sim_result.get("collapses_total", int(colapso_pct * 500))
+                runs_total = sim_result.get("runs", 500)
+                
+                # Calcular Wilson CI Upper Bound
+                ub95 = self._calculate_wilson_upper_bound(collapses_total, runs_total)
 
                 if colapso_pct < 0.05:
                     emoji, status = "✅", "ESTABLE"
@@ -460,11 +492,12 @@ Parámetros Físicos Base:
                 else:
                     emoji, status = "❌", "COLAPSO"
 
-                self._log(f"\n📊 RESULTADO: {emoji} {status} • Tasa de colapso: {colapso_pct:.1%}")
+                self._log(f"\n📊 RESULTADO: {emoji} {status} • Tasa de colapso: {colapso_pct:.1%} • UB95: {ub95:.1%}")
 
                 # Guardar memoria episódica
                 self.experiment_log.append({
                     "ciclo": iteration,
+                    "label": "initial",
                     "timestamp": datetime.now().isoformat(),
                     "hipotesis": {"I": I, "K": K},
                     "parametros_completos": {
@@ -473,38 +506,56 @@ Parámetros Físicos Base:
                         "liquidity": liq,
                         "theta_max": theta
                     },
-                    "resultado": {"tasa_de_colapso": colapso_pct},
+                    "resultado": {
+                        "tasa_de_colapso": colapso_pct,
+                        "upper_ci95": ub95,
+                        "collapses_total": collapses_total,
+                        "runs": runs_total,
+                        "tiempo_promedio_colapso": sim_result.get("tiempo_promedio_colapso", float('inf'))
+                    },
                     "razonamiento_previo": reasoning
                 })
                 
                 # -----------------------------
-                # 🔁 FORZAR RE-EXPLORACIÓN (OPCIONAL)
-                # Si primer experimento colapsó totalmente (≈100%), intentar 1-2 saltos grandes de K
-                # para verificar si existe un umbral estable no explorado por incrementos pequeños.
+                # 🔁 RE-EXPLORACIÓN FORZADA CON VALIDACIÓN ESTADÍSTICA
+                # Si colapso ≥ 99% y K_min_viable es None, ejecutar al menos 2 simulaciones
+                # adicionales con incrementos grandes de K (≥ +1.0 bits), validando estabilidad
+                # con criterios estadísticos (colapso < 5% Y UB95 < 5%).
                 # -----------------------------
+                stability_threshold = 0.05
+                marginal_threshold = 0.15
+                forced_attempts = 2
+                delta_K_step = 1.0
+                
                 try:
-                    # Solo aplicar si estamos en la primera observación absoluta y colapso total
-                    if len(self.experiment_log) == 1 and colapso_pct >= 0.999:
-                        forced_attempts = 2           # número de intentos forzados (puedes reducir a 1)
-                        delta_K_step = 1.0            # salto grande en K (bits)
-                        self._log("\n🔎 Primer experimento colapsó. Iniciando re-exploración forzada de K...")
-
+                    # Condición de activación: colapso ≥ 99% y K_min_viable es None
+                    if colapso_pct >= 0.99 and self.agent_state.get("K_min_viable") is None:
+                        self._log("\n🔎 Colapso ≥ 99% sin K_min_viable detectado. Iniciando re-exploración forzada con validación estadística...")
+                        
+                        marginal_K_candidates = []  # Para réplicas posteriores
+                        
                         for attempt in range(1, forced_attempts + 1):
                             forced_K = max(0.1, min(10.0, K_base + attempt * delta_K_step))
-                            # Aplicar el mismo clamp/action gate que usas normalmente
+                            # Permitir saltos grandes para exploración forzada
                             MAX_K_STEP = 0.75
                             forced_K = max(K_base - MAX_K_STEP, min(forced_K, K_base + MAX_K_STEP * 4))
-                            # Nota: permitimos un rango mayor para forzar la exploración (multiplicamos MAX_K_STEP por 4)
+                            
                             self._log(f"   🧪 Intento forzado #{attempt}: probando K = {forced_K:.2f}")
 
                             theta_f = calculate_collapse_threshold(stock, capital, liq)
                             self._log(f"      • Ejecutando 500 simulaciones Monte Carlo con I={I:.2f}, K={forced_K:.2f}, θ_max={theta_f:.2f}...")
                             sim_forced = run_simulation(I, forced_K, theta_f, runs=500)
                             forced_collapse = sim_forced.get("tasa_de_colapso", 1.0)
+                            forced_collapses_total = sim_forced.get("collapses_total", int(forced_collapse * 500))
+                            forced_runs = sim_forced.get("runs", 500)
+                            
+                            # Calcular Wilson CI Upper Bound
+                            forced_ub95 = self._calculate_wilson_upper_bound(forced_collapses_total, forced_runs)
 
                             # Registrar experimento forzado en memoria
                             self.experiment_log.append({
                                 "ciclo": f"{iteration}-f{attempt}",
+                                "label": f"forced-{attempt}",
                                 "timestamp": datetime.now().isoformat(),
                                 "hipotesis": {"I": I, "K": forced_K},
                                 "parametros_completos": {
@@ -513,15 +564,21 @@ Parámetros Físicos Base:
                                     "liquidity": liq,
                                     "theta_max": theta_f
                                 },
-                                "resultado": {"tasa_de_colapso": forced_collapse},
-                                "razonamiento_previo": f"Forced attempt #{attempt} tras colapso total"
+                                "resultado": {
+                                    "tasa_de_colapso": forced_collapse,
+                                    "upper_ci95": forced_ub95,
+                                    "collapses_total": forced_collapses_total,
+                                    "runs": forced_runs,
+                                    "tiempo_promedio_colapso": sim_forced.get("tiempo_promedio_colapso", float('inf'))
+                                },
+                                "razonamiento_previo": f"Forced attempt #{attempt} tras colapso ≥ 99%"
                             })
 
-                            self._log(f"      ➤ Resultado: Tasa de colapso = {forced_collapse:.1%}")
+                            self._log(f"      ➤ Resultado: Colapso = {forced_collapse:.1%}, UB95 = {forced_ub95:.1%}")
 
-                            # Si encontramos estabilidad, registrarlo y salir de intentos forzados
-                            if forced_collapse < 0.05:
-                                self._log(f"   ✅ Intento forzado exitoso con K={forced_K:.2f}. Marcando K_min_viable.")
+                            # Validar estabilidad estadística: colapso < 5% Y UB95 < 5%
+                            if forced_collapse < stability_threshold and forced_ub95 < stability_threshold:
+                                self._log(f"   ✅ Estabilidad estadística confirmada con K={forced_K:.2f}. Marcando K_min_viable.")
                                 # Actualizar K_min_viable si aplica
                                 if (self.agent_state.get("K_min_viable") is None) or (forced_K < self.agent_state.get("K_min_viable")):
                                     self.agent_state["K_min_viable"] = forced_K
@@ -529,12 +586,74 @@ Parámetros Físicos Base:
                                 # Actualizar K_base para siguientes iteraciones
                                 K_base = forced_K
                                 break
+                            elif stability_threshold <= forced_collapse < marginal_threshold:
+                                # Caso marginal: guardar para réplicas
+                                marginal_K_candidates.append({
+                                    "K": forced_K,
+                                    "colapso": forced_collapse,
+                                    "ub95": forced_ub95,
+                                    "theta": theta_f
+                                })
+                                self._log(f"   ⚠️ Resultado marginal detectado. K={forced_K:.2f} será evaluado con réplicas.")
                             else:
                                 # Si no funcionó, actualizar K_base para siguiente intento forzado
                                 K_base = forced_K
-                except Exception as _:
+                        
+                        # -----------------------------
+                        # LÓGICA DE RÉPLICAS PARA CASOS MARGINALES
+                        # -----------------------------
+                        if marginal_K_candidates and self.agent_state.get("K_min_viable") is None:
+                            self._log("\n🔄 Ejecutando réplicas para casos marginales...")
+                            for candidate in marginal_K_candidates:
+                                replica_K = candidate["K"]
+                                replica_theta = candidate["theta"]
+                                
+                                self._log(f"   🔁 Réplica para K={replica_K:.2f} con runs=1000...")
+                                sim_replica = run_simulation(I, replica_K, replica_theta, runs=1000)
+                                replica_collapse = sim_replica.get("tasa_de_colapso", 1.0)
+                                replica_collapses_total = sim_replica.get("collapses_total", int(replica_collapse * 1000))
+                                replica_runs = sim_replica.get("runs", 1000)
+                                replica_ub95 = self._calculate_wilson_upper_bound(replica_collapses_total, replica_runs)
+                                
+                                # Registrar réplica
+                                self.experiment_log.append({
+                                    "ciclo": f"{iteration}-r{replica_K:.2f}",
+                                    "label": "replica",
+                                    "timestamp": datetime.now().isoformat(),
+                                    "hipotesis": {"I": I, "K": replica_K},
+                                    "parametros_completos": {
+                                        "stock_ratio": stock,
+                                        "capital_ratio": capital,
+                                        "liquidity": liq,
+                                        "theta_max": replica_theta
+                                    },
+                                    "resultado": {
+                                        "tasa_de_colapso": replica_collapse,
+                                        "upper_ci95": replica_ub95,
+                                        "collapses_total": replica_collapses_total,
+                                        "runs": replica_runs,
+                                        "tiempo_promedio_colapso": sim_replica.get("tiempo_promedio_colapso", float('inf'))
+                                    },
+                                    "razonamiento_previo": f"Réplica para validar caso marginal K={replica_K:.2f}"
+                                })
+                                
+                                self._log(f"      ➤ Réplica: Colapso = {replica_collapse:.1%}, UB95 = {replica_ub95:.1%}")
+                                
+                                # Validar estabilidad estadística en réplica
+                                if replica_collapse < stability_threshold and replica_ub95 < stability_threshold:
+                                    self._log(f"   ✅ Réplica confirma estabilidad estadística con K={replica_K:.2f}. Marcando K_min_viable.")
+                                    if (self.agent_state.get("K_min_viable") is None) or (replica_K < self.agent_state.get("K_min_viable")):
+                                        self.agent_state["K_min_viable"] = replica_K
+                                        self.agent_state["margin"] = replica_K - I
+                                    K_base = replica_K
+                                    break
+                                elif replica_collapse > marginal_threshold or replica_ub95 >= stability_threshold:
+                                    self._log(f"   ❌ Réplica confirma fragilidad. K={replica_K:.2f} no es viable.")
+                                    # Continuar con siguiente candidato o marcar FRÁGIL si no hay más
+                                    
+                except Exception as e:
                     # No romper el loop por fallo en esta etapa forzada
-                    self._log("   ⚠️ Error durante re-exploración forzada (continuando).")
+                    self._log(f"   ⚠️ Error durante re-exploración forzada: {e} (continuando).")
                 # -----------------------------
 
 
@@ -544,17 +663,18 @@ Parámetros Físicos Base:
                     self.experiment_log = [compressed_state]
                     self._log("   📦 Estado de simulación comprimido para reducir tokens (80% menos).")
 
-                # 🔧 FIX: Registrar K_min_viable en CUALQUIER fase si es estable
-                if colapso_pct < 0.05:
+                # 🔧 FIX: Registrar K_min_viable en CUALQUIER fase si es estable estadísticamente
+                # Validar estabilidad: colapso < 5% Y UB95 < 5%
+                if colapso_pct < 0.05 and ub95 < 0.05:
                     if (self.agent_state["K_min_viable"] is None or 
                         K < self.agent_state["K_min_viable"]):
                         self.agent_state["K_min_viable"] = K
                         self.agent_state["margin"] = K - I
-                        self._log(f"   ✨ K mínimo viable detectado: {K:.2f} bits")
+                        self._log(f"   ✨ K mínimo viable detectado (estadísticamente confirmado): {K:.2f} bits (UB95={ub95:.1%})")
 
-                # Actualizar FSM
+                # Actualizar FSM con validación estadística
                 try:
-                    self.fsm.update(colapso_pct)
+                    self.fsm.update(colapso_pct, ub95)
                 except Exception:
                     pass
 
@@ -657,24 +777,69 @@ Historial de Experimentos (resumido):
             # Si no hay reporte desde CONCLUDE, generar reporte estándar
             K_min = self.agent_state.get("K_min_viable")
             margin = self.agent_state.get("margin")
-            max_collapse = max(
-                [exp["resultado"]["tasa_de_colapso"] for exp in self.experiment_log],
+            
+            # Calcular métricas estadísticas para determinar estado final
+            all_experiments = [exp for exp in self.experiment_log if not exp.get("compressed")]
+            
+            if not all_experiments:
+                # Si todos están comprimidos, usar datos comprimidos
+                max_collapse = 0.0
+                max_ub95 = 0.0
+                avg_collapse_time = float('inf')
+            else:
+                max_collapse = max(
+                    [exp["resultado"]["tasa_de_colapso"] for exp in all_experiments],
+                    default=0.0
+                )
+                
+                # Calcular tiempo promedio de colapso de experimentos críticos
+                collapse_times = [
+                    exp.get("resultado", {}).get("tiempo_promedio_colapso", 0)
+                    for exp in all_experiments
+                    if exp.get("resultado", {}).get("tasa_de_colapso", 0) > 0.15
+                ]
+                avg_collapse_time = (
+                    sum(collapse_times) / len(collapse_times) 
+                    if collapse_times else float('inf')
+                )
+            total_attempts = len(all_experiments)
+            
+            # Contar intentos forzados
+            forced_count = sum(1 for exp in all_experiments if exp.get("label", "").startswith("forced"))
+            initial_count = sum(1 for exp in all_experiments if exp.get("label") == "initial")
+            
+            # Verificar si se cumplieron criterios para FRÁGIL
+            has_forced_attempts = forced_count >= 2
+            has_initial = initial_count >= 1
+            min_attempts_for_fragile = has_initial and has_forced_attempts
+            
+            # Calcular máximo UB95
+            max_ub95 = max(
+                [exp["resultado"].get("upper_ci95", exp["resultado"]["tasa_de_colapso"]) 
+                 for exp in all_experiments],
                 default=0.0
             )
             
-            # Calcular tiempo promedio de colapso de experimentos críticos
-            collapse_times = [
-                exp.get("resultado", {}).get("tiempo_promedio_colapso", 0)
-                for exp in self.experiment_log
-                if exp.get("resultado", {}).get("tasa_de_colapso", 0) > 0.15
-            ]
-            avg_collapse_time = (
-                sum(collapse_times) / len(collapse_times) 
-                if collapse_times else float('inf')
-            )
-
-            # 🔧 FIX: Reporte final enriquecido
-            estado_final = "✅ ESTABLE" if max_collapse < 0.05 else "⚠️ MARGINAL" if max_collapse < 0.15 else "❌ FRÁGIL"
+            # Determinar estado final con validación estadística
+            if K_min is not None:
+                # Verificar que K_min tenga validación estadística
+                k_min_experiments = [exp for exp in all_experiments 
+                                    if abs(exp["hipotesis"]["K"] - K_min) < 0.01]
+                k_min_statistically_stable = any(
+                    exp["resultado"]["tasa_de_colapso"] < 0.05 and 
+                    exp["resultado"].get("upper_ci95", 1.0) < 0.05
+                    for exp in k_min_experiments
+                )
+                if k_min_statistically_stable:
+                    estado_final = "✅ ROBUSTO"
+                else:
+                    estado_final = "⚠️ MARGINAL"
+            elif min_attempts_for_fragile and max_ub95 >= 0.05:
+                estado_final = "❌ FRÁGIL"
+            elif max_collapse < 0.15:
+                estado_final = "⚠️ MARGINAL"
+            else:
+                estado_final = "❌ FRÁGIL"
             
             final_report = f"""# 🎯 Diagnóstico de Fragilidad Estructural
 
@@ -682,23 +847,30 @@ Historial de Experimentos (resumido):
 - **Sistema Analizado:** {volatilidad} volatilidad, {rigidez} rigidez, {colchon} meses colchón
 - **Estado Final:** {estado_final}
 - **Probabilidad de Colapso Máxima:** {max_collapse:.1%}
+- **UB95 Máximo:** {max_ub95:.1%}
 - **Fase FSM Final:** {self.fsm.phase_name()}
-- **Experimentos Ejecutados:** {len(self.experiment_log)}
+- **Experimentos Ejecutados:** {total_attempts} (inicial: {initial_count}, forzados: {forced_count})
 
 ## 🔬 Hallazgos Clave
 """
 
             if K_min is not None:
                 final_report += f"""
-- **K Mínimo Viable Detectado:** {K_min:.2f} bits
-  - Capacidad mínima requerida para mantener estabilidad
+- **K Mínimo Viable Detectado (estadísticamente confirmado):** {K_min:.2f} bits
+  - Capacidad mínima requerida para mantener estabilidad (colapso < 5% y UB95 < 5%)
 - **Margen de Seguridad sobre I:** {margin:.2f} bits
   - Exceso de capacidad disponible para absorber picos
 """
             else:
-                final_report += """
+                # Justificación rigurosa de FRÁGIL
+                k_values_tested = [exp["hipotesis"]["K"] for exp in all_experiments]
+                k_values_str = ", ".join([f"{k:.2f}" for k in sorted(set(k_values_tested))])
+                
+                final_report += f"""
 - **K Mínimo Viable:** No detectado durante auditoría
-  - El sistema no alcanzó estabilidad en el espacio explorado
+  - **Justificación estadística:** No se encontró K con UB95<5% tras probar {len(set(k_values_tested))} valores de K crecientes: [{k_values_str}] bits
+  - Ninguna simulación cumplió simultáneamente: colapso < 5% **Y** UB95 < 5%
+  - Sistema declarado FRÁGIL tras {total_attempts} experimentos (1 inicial + {forced_count} forzados)
 """
 
             if avg_collapse_time != float('inf'):
@@ -736,14 +908,16 @@ Historial de Experimentos (resumido):
                 else:
                     final_report += f"**Estado Comprimido:** {str(summary)}\n"
             else:
-                final_report += "| Ciclo | K (bits) | Colapso (%) | Estado |\n"
-                final_report += "|-------|----------|-------------|--------|\n"
+                final_report += "| Ciclo | K (bits) | Colapso (%) | UB95 (%) | Estado |\n"
+                final_report += "|-------|----------|-------------|----------|--------|\n"
 
-                for exp in self.experiment_log:
+                for exp in all_experiments:
                     k_val = exp["hipotesis"]["K"]
                     collapse = exp["resultado"]["tasa_de_colapso"]
-                    estado = "✅" if collapse < 0.05 else "⚠️" if collapse < 0.15 else "❌"
-                    final_report += f"| {exp['ciclo']} | {k_val:.2f} | {collapse:.1%} | {estado} |\n"
+                    ub95 = exp["resultado"].get("upper_ci95", collapse)
+                    estado = "✅" if collapse < 0.05 and ub95 < 0.05 else "⚠️" if collapse < 0.15 else "❌"
+                    label_info = f" ({exp.get('label', 'N/A')})" if exp.get('label') else ""
+                    final_report += f"| {exp.get('ciclo', 'N/A')}{label_info} | {k_val:.2f} | {collapse:.1%} | {ub95:.1%} | {estado} |\n"
 
             final_report += f"""
 ---
@@ -759,17 +933,22 @@ Historial de Experimentos (resumido):
     # =========================================================
     
     def _format_experiment_table(self) -> str:
-        """Genera tabla markdown de experimentos."""
+        """Genera tabla markdown de experimentos con métricas estadísticas."""
         if not self.experiment_log:
             return "*No hay experimentos registrados*"
         
-        table = "| Ciclo | K (bits) | Colapso (%) | Estado |\n"
-        table += "|-------|----------|-------------|--------|\n"
+        # Verificar si hay datos comprimidos
+        if len(self.experiment_log) == 1 and self.experiment_log[0].get("compressed"):
+            return "*Estado comprimido - ver detalles en reporte*"
+        
+        table = "| Ciclo | K (bits) | Colapso (%) | UB95 (%) | Estado |\n"
+        table += "|-------|----------|-------------|----------|--------|\n"
         
         for exp in self.experiment_log:
             k_val = exp["hipotesis"]["K"]
             collapse = exp["resultado"]["tasa_de_colapso"]
-            estado = "✅" if collapse < 0.05 else "⚠️" if collapse < 0.15 else "❌"
-            table += f"| {exp['ciclo']} | {k_val:.2f} | {collapse:.1%} | {estado} |\n"
+            ub95 = exp["resultado"].get("upper_ci95", collapse)  # Fallback a colapso si no hay UB95
+            estado = "✅" if collapse < 0.05 and ub95 < 0.05 else "⚠️" if collapse < 0.15 else "❌"
+            table += f"| {exp.get('ciclo', 'N/A')} | {k_val:.2f} | {collapse:.1%} | {ub95:.1%} | {estado} |\n"
         
         return table
