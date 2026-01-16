@@ -1,0 +1,15 @@
+# requirements.txt - Iso-Entropy Autonomous Agent
+
+# Core Framework
+streamlit>=1.28.0
+python-dotenv>=0.21.0
+
+# AI Engine (Gemini 2.5 Flash Lite)
+google-genai>=0.1.0
+
+# Data Processing & Visualization
+pandas>=2.0.0
+plotly>=5.17.0
+
+# Development (Optional but recommended)
+watchdog>=3.0.0  # Auto-reload for Streamlit during development
