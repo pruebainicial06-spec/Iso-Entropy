@@ -155,7 +155,7 @@ report = agent.audit_system(...)  # Simula correctamente
 ## 📁 Estructura de Carpetas
 
 ```
-ISO-ENTROPIA/
+ISO-ENTROPY/
 ├── src/                         # Código fuente
 │   ├── core/                    # Motor científico
 │   │   ├── agent.py            # Orquestador autónomo
@@ -411,7 +411,7 @@ alpha = 0.2  # 0.15 default
 
 Las contribuciones son bienvenidas:
 ```bash
-git clone https://github.com/RogelioAlcantarRangel/Iso-Entropia.git
+git clone https://github.com/RogelioAlcantarRangel/Iso-Entropy.git
 git checkout -b feature/mi-mejora
 # ... hacer cambios ...
 git push origin feature/mi-mejora
@@ -427,7 +427,7 @@ MIT License - Ver [LICENSE](LICENSE)
 
 ## 📞 Soporte
 
-- **Issues:** [GitHub Issues](https://github.com/RogelioAlcantarRangel/Iso-Entropia/issues)
+- **Issues:** [GitHub Issues](https://github.com/RogelioAlcantarRangel/Iso-Entropy/issues)
 - **Documentación:** [INDICE_COMPLETO.md](INDICE_COMPLETO.md)
 - **Ejemplo Real:** [CASO_USO_INNOVASTORE.md](CASO_USO_INNOVASTORE.md)
 

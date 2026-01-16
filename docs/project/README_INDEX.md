@@ -50,7 +50,7 @@
 ## 📁 Archivos Modificados
 
 ```
-c:\Users\rogel\OneDrive\ISO-ENTROPIA\
+c:\Users\rogel\OneDrive\ISO-ENTROPY\
 ├── ✏️ prompt_templates.py        [MODIFICADO] +16 líneas
 ├── ✏️ agent.py                   [MODIFICADO] +120 líneas
 ├── ✏️ telemetry.py               [MODIFICADO] +12 líneas

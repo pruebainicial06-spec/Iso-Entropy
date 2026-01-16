@@ -19,7 +19,7 @@ Salida:      Reporte con:
 
 ```bash
 # Ya está instalado en:
-cd c:\Users\rogel\OneDrive\ISO-ENTROPIA
+cd c:\Users\rogel\OneDrive\ISO-ENTROPY
 
 # Verificar dependencias
 pip list | grep streamlit google-generativeai
@@ -359,7 +359,7 @@ ISO-ENTROPÍA v2.3 REALMENTE funciona cuando:
 
 ```bash
 # Paso 1: Ir a carpeta
-cd c:\Users\rogel\OneDrive\ISO-ENTROPIA
+cd c:\Users\rogel\OneDrive\ISO-ENTROPY
 
 # Paso 2: Ejecutar
 streamlit run app.py

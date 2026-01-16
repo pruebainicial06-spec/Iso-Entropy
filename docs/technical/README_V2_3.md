@@ -178,7 +178,7 @@ Sistema colapsa cuando:
 
 ### Opción 1: UI Streamlit (Recomendado)
 ```bash
-cd c:\Users\rogel\OneDrive\ISO-ENTROPIA
+cd c:\Users\rogel\OneDrive\ISO-ENTROPY
 streamlit run app.py
 ```
 - Ingresa volatilidad, rigidez, colchón
@@ -348,7 +348,7 @@ ISO-ENTROPÍA v2.3 cumple con tu demanda:
 ## Archivos Principales
 
 ```
-c:\Users\rogel\OneDrive\ISO-ENTROPIA\
+c:\Users\rogel\OneDrive\ISO-ENTROPY\
 ├── app.py                              # UI Streamlit
 ├── agent.py                            # Agente autónomo ⭐ MEJORADO v2.3
 ├── prompt_templates.py                 # Prompts por fase ⭐ MEJORADO v2.3

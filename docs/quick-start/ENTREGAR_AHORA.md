@@ -82,7 +82,7 @@ Physics.py mejorado:
 ## Cómo Usar (Opción 1: UI - Recomendado)
 
 ```bash
-cd c:\Users\rogel\OneDrive\ISO-ENTROPIA
+cd c:\Users\rogel\OneDrive\ISO-ENTROPY
 streamlit run app.py
 # Se abre http://localhost:8501
 # Ingresa: volatilidad + rigidez + colchón
@@ -182,7 +182,7 @@ Resultado: Acción preventiva, 90% probabilidad de supervivencia
 ## Archivos Importantes
 
 ```
-c:\Users\rogel\OneDrive\ISO-ENTROPIA\
+c:\Users\rogel\OneDrive\ISO-ENTROPY\
 ├── QUICK_START.md              ⭐ EMPEZAR AQUÍ
 ├── README_V2_3.md              Visión completa
 ├── QUE_REALMENTE_FUNCIONE.md   Garantías técnicas

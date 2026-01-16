@@ -3,7 +3,7 @@
 ## Árbol de Archivos Modificados y Documentos Generados
 
 ```
-c:\Users\rogel\OneDrive\ISO-ENTROPIA\
+c:\Users\rogel\OneDrive\ISO-ENTROPY\
 │
 ├── 🔧 CÓDIGO MODIFICADO
 │   ├── ✏️ prompt_templates.py
