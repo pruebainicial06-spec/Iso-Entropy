@@ -238,8 +238,8 @@ Resultado: 90% probabilidad de supervivencia
 
 ### 1. Instalación
 ```bash
-git clone https://github.com/RogelioAlcantarRangel/Iso-Entropia.git
-cd Iso-Entropia
+git clone https://github.com/RogelioAlcantarRangel/Iso-Entropy.git
+cd Iso-Entropy
 pip install -r requirements.txt
 ```
 
