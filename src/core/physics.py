@@ -45,15 +45,17 @@ def run_simulation(I: float, K: float, theta_max: float, runs: int = 500, time_s
         alpha (float): Tasa de disipación de la deuda cuando K > I.
 
     Returns:
-        dict: Un diccionario con resultados numéricos, incluyendo 'tasa_de_colapso'
-              y 'tiempo_promedio_colapso'.
+        dict: Un diccionario con resultados numéricos, incluyendo 'tasa_de_colapso',
+              'tiempo_promedio_colapso', 'insolvencia_informacional' y 'deuda_entropica_residual'.
     """
     if not all(isinstance(i, (int, float)) and i >= 0 for i in [I, K, theta_max, runs, time_steps, alpha]):
         raise ValueError("Todos los parámetros de entrada deben ser números no negativos.")
 
+    import statistics
     collapses = 0
-    total_collapse_time = 0
     collapse_times_list = []
+    ratios_list = []
+    residual_debts = []
     
     # Volatilidad realista
     volatility_i = 0.4  # 40% de volatilidad (mercados reales)
@@ -61,25 +63,28 @@ def run_simulation(I: float, K: float, theta_max: float, runs: int = 500, time_s
 
     for _ in range(runs):
         entropy_debt = 0.0
+        run_ratios = []
+        collapsed = False
         for t in range(1, time_steps + 1):
             # Usar distribución normal en lugar de uniforme (más realista)
-            # Normal distribution centrada en I y K con desviación estándar proporcional
-            import statistics
             input_entropy = random.gauss(I, I * volatility_i)
             response_capacity = random.gauss(K, K * volatility_k)
             
             # Asegurar que los valores no sean negativos
-            input_entropy = max(0.01, input_entropy)  # Min 0.01 para evitar valores nulos
+            input_entropy = max(0.01, input_entropy)
             response_capacity = max(0.01, response_capacity)
 
-            # Ecuación dinámica mejorada de la Deuda de Entropía
-            # Considera la relación I/K explícitamente
+            # Ratio I/K (Insolvencia Informacional instantánea)
             ratio = input_entropy / response_capacity if response_capacity > 0 else float('inf')
+            run_ratios.append(ratio)
             
-            if ratio > 1.0:  # Sistema sobrecargado
-                accumulation = (input_entropy - response_capacity) * (1 + (ratio - 1) ** 0.5)  # Acumulación no-lineal
+            # Ecuación dinámica: Si I > K crónicamente, el colapso es inevitable.
+            # El aumento de K (si sigue siendo < I) solo reduce la velocidad de acumulación.
+            if ratio > 1.0:  # Sistema sobrecargado (Violación de Ley de Ashby)
+                # Acumulación no-lineal: el daño crece exponencialmente con el ratio
+                accumulation = (input_entropy - response_capacity) * (1 + (ratio - 1) ** 0.5)
             else:
-                accumulation = max(0, input_entropy - response_capacity)
+                accumulation = 0
             
             dissipation = alpha * max(0, response_capacity - input_entropy)
             entropy_debt = max(0, entropy_debt + accumulation - dissipation)
@@ -87,17 +92,27 @@ def run_simulation(I: float, K: float, theta_max: float, runs: int = 500, time_s
             # Comprobar si el sistema colapsa
             if entropy_debt >= theta_max:
                 collapses += 1
-                total_collapse_time += t
                 collapse_times_list.append(t)
-                break  # Termina esta simulación y pasa a la siguiente
+                residual_debts.append(entropy_debt)
+                collapsed = True
+                break
+        
+        if not collapsed:
+            residual_debts.append(entropy_debt)
+        
+        if run_ratios:
+            ratios_list.append(statistics.mean(run_ratios))
     
     collapse_rate = collapses / runs if runs > 0 else 0
-    # El tiempo promedio se calcula solo sobre las simulaciones que colapsaron
     average_collapse_time = statistics.mean(collapse_times_list) if collapse_times_list else float('inf')
+    avg_insolvency = statistics.mean(ratios_list) if ratios_list else (I / K if K > 0 else float('inf'))
+    avg_residual_debt = statistics.mean(residual_debts) if residual_debts else 0.0
 
     return {
         "tasa_de_colapso": collapse_rate,
         "tiempo_promedio_colapso": average_collapse_time,
+        "insolvencia_informacional": avg_insolvency,
+        "deuda_entropica_residual": avg_residual_debt,
         "collapses_total": collapses,
         "runs": runs
     }
@@ -123,6 +138,8 @@ if __name__ == '__main__':
     print(f"Umbral de Colapso (θ_max): {theta_max_fragil:.2f} bits")
     print(f"Tasa de Colapso: {resultados_fragil['tasa_de_colapso']:.2%}")
     print(f"Tiempo Promedio de Colapso: {resultados_fragil['tiempo_promedio_colapso']:.2f} semanas")
+    print(f"Insolvencia Informacional (I/K): {resultados_fragil['insolvencia_informacional']:.2f}")
+    print(f"Deuda Entrópica Residual: {resultados_fragil['deuda_entropica_residual']:.2f}")
     print("-" * 30)
 
     # Escenario 2: Sistema "Resiliente"
@@ -143,4 +160,6 @@ if __name__ == '__main__':
     print(f"Umbral de Colapso (θ_max): {theta_max_resiliente:.2f} bits")
     print(f"Tasa de Colapso: {resultados_resiliente['tasa_de_colapso']:.2%}")
     print(f"Tiempo Promedio de Colapso: {resultados_resiliente['tiempo_promedio_colapso']:.2f} semanas")
+    print(f"Insolvencia Informacional (I/K): {resultados_resiliente['insolvencia_informacional']:.2f}")
+    print(f"Deuda Entrópica Residual: {resultados_resiliente['deuda_entropica_residual']:.2f}")
     print("-" * 30)

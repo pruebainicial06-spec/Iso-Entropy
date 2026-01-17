@@ -233,11 +233,12 @@ Respuesta en formato JSON:
         if I > K_base * 1.5:
             return False, {
                 "action": "TERMINATE",
-                "reasoning": "Colapso determinista I >> K",
+                "reasoning": "Insolvencia Informacional Persistente: Violación de la Ley de Ashby (I > K)",
                 "final_verdict": (
                     f"## ❌ Colapso Inevitable\n\n"
-                    f"I = {I:.2f} > 1.5 × K = {K_base:.2f}\n"
-                    "Fuera de región de control."
+                    f"**Insolvencia Informacional Persistente:** I = {I:.2f} > K = {K_base:.2f}\n"
+                    f"**Causa raíz:** Violación de la Ley de Ashby - la entropía externa supera persistentemente la capacidad de respuesta.\n"
+                    "El sistema es FRÁGIL debido a incapacidad estructural para homeostasis informacional."
                 )
             }
 
@@ -547,6 +548,7 @@ Parámetros Físicos Base:
                 self._log(f"\n📊 RESULTADO: {emoji} {status} • Tasa de colapso: {colapso_pct:.1%} • UB95: {ub95:.1%}")
 
                 # Guardar memoria episódica
+                ii = I / K if K > 0 else float('inf')
                 self.experiment_log.append({
                     "ciclo": iteration,
                     "label": "initial",
@@ -563,7 +565,9 @@ Parámetros Físicos Base:
                         "upper_ci95": ub95,
                         "collapses_total": collapses_total,
                         "runs": runs_total,
-                        "tiempo_promedio_colapso": sim_result.get("tiempo_promedio_colapso", float('inf'))
+                        "tiempo_promedio_colapso": sim_result.get("tiempo_promedio_colapso", float('inf')),
+                        "insolvencia_informacional": ii,
+                        "deuda_entropica_residual": 0.0  # Placeholder, se calcula en compresión
                     },
                     "razonamiento_previo": reasoning
                 })
@@ -606,6 +610,7 @@ Parámetros Físicos Base:
                             forced_ub95 = self._calculate_wilson_upper_bound(forced_collapses_total, forced_runs)
 
                             # Registrar experimento forzado en memoria
+                            ii_forced = I / forced_K if forced_K > 0 else float('inf')
                             self.experiment_log.append({
                                 "ciclo": f"{iteration}-f{attempt}",
                                 "label": f"forced-{attempt}",
@@ -622,7 +627,9 @@ Parámetros Físicos Base:
                                     "upper_ci95": forced_ub95,
                                     "collapses_total": forced_collapses_total,
                                     "runs": forced_runs,
-                                    "tiempo_promedio_colapso": sim_forced.get("tiempo_promedio_colapso", float('inf'))
+                                    "tiempo_promedio_colapso": sim_forced.get("tiempo_promedio_colapso", float('inf')),
+                                    "insolvencia_informacional": ii_forced,
+                                    "deuda_entropica_residual": 0.0  # Placeholder
                                 },
                                 "razonamiento_previo": f"Forced attempt #{attempt} tras colapso ≥ 99%"
                             })
@@ -668,6 +675,7 @@ Parámetros Físicos Base:
                                 replica_ub95 = self._calculate_wilson_upper_bound(replica_collapses_total, replica_runs)
                                 
                                 # Registrar réplica
+                                ii_replica = I / replica_K if replica_K > 0 else float('inf')
                                 self.experiment_log.append({
                                     "ciclo": f"{iteration}-r{replica_K:.2f}",
                                     "label": "replica",
@@ -684,7 +692,9 @@ Parámetros Físicos Base:
                                         "upper_ci95": replica_ub95,
                                         "collapses_total": replica_collapses_total,
                                         "runs": replica_runs,
-                                        "tiempo_promedio_colapso": sim_replica.get("tiempo_promedio_colapso", float('inf'))
+                                        "tiempo_promedio_colapso": sim_replica.get("tiempo_promedio_colapso", float('inf')),
+                                        "insolvencia_informacional": ii_replica,
+                                        "deuda_entropica_residual": 0.0  # Placeholder
                                     },
                                     "razonamiento_previo": f"Réplica para validar caso marginal K={replica_K:.2f}"
                                 })
@@ -1034,7 +1044,8 @@ Historial de Experimentos (resumido):
                 k_values_str = ", ".join([f"{k:.2f}" for k in sorted(set(k_values_tested))])
                 
                 final_report += f"""
-- **K Mínimo Viable:** No detectado durante auditoría
+- **Insolvencia Informacional Persistente:** El sistema exhibe colapso persistente debido a la violación de la Ley de Ashby (I > K)
+  - **Causa raíz:** La entropía externa (I) supera persistentemente la capacidad del sistema (K), impidiendo la homeostasis informacional
   - **Justificación estadística:** No se encontró K con UB95<5% tras probar {len(set(k_values_tested))} valores de K crecientes: [{k_values_str}] bits
   - Ninguna simulación cumplió simultáneamente: colapso < 5% **Y** UB95 < 5%
   - Sistema declarado FRÁGIL tras {total_attempts} experimentos (1 inicial + {forced_count} forzados)
@@ -1108,14 +1119,16 @@ Historial de Experimentos (resumido):
         if len(self.experiment_log) == 1 and self.experiment_log[0].get("compressed"):
             return "*Estado comprimido - ver detalles en reporte*"
         
-        table = "| Ciclo | K (bits) | Colapso (%) | UB95 (%) | Estado |\n"
-        table += "|-------|----------|-------------|----------|--------|\n"
-        
+        table = "| Ciclo | K (bits) | Colapso (%) | UB95 (%) | II | D_e | Estado |\n"
+        table += "|-------|----------|-------------|----------|----|-----|--------|\n"
+
         for exp in self.experiment_log:
             k_val = exp["hipotesis"]["K"]
             collapse = exp["resultado"]["tasa_de_colapso"]
             ub95 = exp["resultado"].get("upper_ci95", collapse)  # Fallback a colapso si no hay UB95
+            ii = exp["resultado"].get("insolvencia_informacional", "N/A")
+            de = exp["resultado"].get("deuda_entropica_residual", "N/A")
             estado = "✅" if collapse < self.STABILITY_THRESHOLD and ub95 < self.STABILITY_THRESHOLD else "⚠️" if collapse < self.MARGINAL_THRESHOLD else "❌"
-            table += f"| {exp.get('ciclo', 'N/A')} | {k_val:.2f} | {collapse:.1%} | {ub95:.1%} | {estado} |\n"
+            table += f"| {exp.get('ciclo', 'N/A')} | {k_val:.2f} | {collapse:.1%} | {ub95:.1%} | {ii if isinstance(ii, str) else f'{ii:.2f}'} | {de if isinstance(de, str) else f'{de:.2f}'} | {estado} |\n"
         
         return table

@@ -173,7 +173,33 @@ def main():
             st.divider()
             st.subheader("3️⃣ Informe Forense Final")
             st.markdown(resultado["reporte"])
-            
+
+            # Indicador de Insolvencia Informacional
+            if agent.experiment_log:
+                ii_values = [exp.get("insolvencia_informacional", 0) for exp in agent.experiment_log if "insolvencia_informacional" in exp]
+                if ii_values:
+                    ii_avg = sum(ii_values) / len(ii_values)
+                    estado = "Solvente" if ii_avg <= 1 else "Insolvente"
+                    delta = "Estable" if ii_avg <= 1 else "Crítico"
+                    st.metric(
+                        label="Estado de Insolvencia Informacional (II)",
+                        value=f"{estado} (II = {ii_avg:.2f})",
+                        delta=delta
+                    )
+                    with st.expander("ℹ️ Explicación de la Ley de Ashby"):
+                        st.markdown("""
+                        **Ley de Ashby (Requisito de Variedad):** Un sistema debe tener al menos tanta variedad (capacidad K) como la variedad del entorno (entropía I) para ser viable.
+
+                        - **II = I/K**: Si II ≤ 1, el sistema es solvente (puede absorber la entropía).
+                        - **II > 1**: Insolvencia informacional - el sistema es insuficiente y acumula deuda entrópica.
+                        """)
+
+            # Indicador de Fragilidad
+            if agent.experiment_log:
+                ii_max = max([exp.get("insolvencia_informacional", 0) for exp in agent.experiment_log if "insolvencia_informacional" in exp] or [0])
+                if ii_max > 1:
+                    st.warning("🚨 **Sistema FRÁGIL**: Insolvencia informacional persistente detectada. El sistema acumula deuda entrópica y es vulnerable al colapso.")
+
             # Botón de descarga
             st.download_button(
                 label="📥 Descargar Reporte",
@@ -210,6 +236,41 @@ def main():
                             )
                             fig.add_hline(y=5, line_dash="dash", line_color="red")
                             st.plotly_chart(fig, width='stretch')
+
+                        # Nueva gráfica para Deuda Entrópica Residual (D_e)
+                        df_de = pd.DataFrame([
+                            {
+                                "Ciclo": exp["ciclo"],
+                                "Deuda Entrópica Residual (D_e)": exp.get("deuda_entropica_residual", 0)
+                            }
+                            for exp in agent.experiment_log
+                            if "deuda_entropica_residual" in exp
+                        ])
+
+                        if not df_de.empty:
+                            fig_de = px.line(
+                                df_de, x="Ciclo", y="Deuda Entrópica Residual (D_e)",
+                                markers=True,
+                                title="Acumulación de Deuda Entrópica Residual a lo Largo del Tiempo"
+                            )
+                            st.plotly_chart(fig_de, width='stretch')
+
+                        # Tabla actualizada con II y D_e
+                        df_full = pd.DataFrame([
+                            {
+                                "Ciclo": exp["ciclo"],
+                                "K": exp["hipotesis"]["K"],
+                                "Colapso (%)": exp["resultado"]["tasa_de_colapso"] * 100,
+                                "Insolvencia Informacional (II)": exp.get("insolvencia_informacional", 0),
+                                "Deuda Entrópica Residual (D_e)": exp.get("deuda_entropica_residual", 0)
+                            }
+                            for exp in agent.experiment_log
+                            if "resultado" in exp
+                        ])
+
+                        if not df_full.empty:
+                            st.dataframe(df_full)
+
                     except ImportError:
                         st.info("Instala `plotly` para ver gráficas: `pip install plotly`")
         else:

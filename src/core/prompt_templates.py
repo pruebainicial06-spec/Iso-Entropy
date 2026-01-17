@@ -53,6 +53,8 @@ INSTRUCCIONES CRÍTICAS:
 4. Criterio de éxito:
    - tasa_de_colapso < 0.05 = ÉXITO
    - Si logras esto en ORIENT, el sistema avanzará a VALIDATE
+
+5. Evalúa la relación I/K: Si I > K, el sistema es estructuralmente insolvente (Insolvencia Informacional).
 """
 
     elif phase == AgentPhase.VALIDATE:
@@ -120,6 +122,8 @@ INSTRUCCIONES:
 - Estima el horizonte de supervivencia en ciclos antes del colapso total.
 - Propón una mitigación accionable específica para reducir la deuda de entropía.
 - Sé preciso y cuantitativo en tus hallazgos.
+- Usa términos como "Insolvencia Informacional" y explica violaciones de la Ley de Ashby en el análisis final.
+- Recuerda que si I > K, el sistema es estructuralmente insolvente.
 """
 
     else:
