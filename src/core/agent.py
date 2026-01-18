@@ -308,24 +308,24 @@ Respuesta en formato JSON:
         if self.is_mock_mode:
             # Mock mode: proporcionar decisiones inteligentes según la fase
             if self.fsm.phase == AgentPhase.ORIENT:
-                decision = {"action": "SIMULATE", "parameters": {"K": 1.5}, "reasoning": "Mock: Explorando incremento de K"}
+                decision = {"action": "SIMULATE", "parameters": {"K": 1.5}, "reasoning": "Mock: Explorando incremento de K", "_internal_thoughts": "Mock thinking"}
             elif self.fsm.phase == AgentPhase.VALIDATE:
-                decision = {"action": "SIMULATE", "parameters": {"K": 1.5}, "reasoning": "Mock: Validando estabilidad"}
+                decision = {"action": "SIMULATE", "parameters": {"K": 1.5}, "reasoning": "Mock: Validando estabilidad", "_internal_thoughts": "Mock thinking"}
             elif self.fsm.phase == AgentPhase.STRESS:
-                decision = {"action": "SIMULATE", "parameters": {"K": 1.5}, "reasoning": "Mock: Testeando fragilidad"}
+                decision = {"action": "SIMULATE", "parameters": {"K": 1.5}, "reasoning": "Mock: Testeando fragilidad", "_internal_thoughts": "Mock thinking"}
             elif self.fsm.phase == AgentPhase.CONCLUDE:
-                decision = {"action": "REPORT", "report_content": "Mock: Reporte de auditoría completado"}
+                decision = {"action": "REPORT", "report_content": "Mock: Reporte de auditoría completado", "_internal_thoughts": "Mock thinking"}
             else:
                 decision = {"action": "TERMINATE", "reasoning": "Mock: Fase desconocida"}
             self.prompt_cache[cache_key] = decision
             return decision
 
- # --- CONFIGURACIÓN DE THINKING Y TEMPERATURA ---
+        # --- CONFIGURACIÓN DE THINKING Y TEMPERATURA ---
         generate_content_config = types.GenerateContentConfig(
             temperature=0.25,
             thinking_config=types.ThinkingConfig(
-                include_thoughts=False,  # Deshabilitado para reducir tokens
-                thinking_level="low"  # Nivel bajo para optimizar costos
+                include_thoughts=True,  # <--- ACTIVADO PARA VER EL CEREBRO
+                thinking_level="low"
             ),
         )
 
@@ -336,10 +336,21 @@ Respuesta en formato JSON:
                 config=generate_content_config
             )
 
-            # Opcional: Si quieres ver los "thoughts" en la terminal/logs:
-            if response.thoughts:
-                self._log(f"\n💭 PENSAMIENTO INTERNO (Thinking):\n{response.thoughts}\n")
+            # CAPTURA DE PENSAMIENTOS (THOUGHTS)
+            thoughts = "No disponible"
+            try:
+                # Intentar obtener thoughts de la estructura de respuesta (SDK v1)
+                if hasattr(response, 'candidates') and response.candidates:
+                    for part in response.candidates[0].content.parts:
+                        if hasattr(part, 'thought') and part.thought:
+                            thoughts = part.thought
+                            break
+            except Exception:
+                pass # Fallback silencioso
 
+            # Opcional: Log en consola
+            if thoughts != "No disponible":
+                self._log(f"\n💭 PENSAMIENTO INTERNO (Thinking):\n{thoughts[:200]}...\n")
 
             if self.fsm.phase == AgentPhase.CONCLUDE:
                 decision = {"action": "REPORT", "report_content": response.text}
@@ -351,6 +362,10 @@ Respuesta en formato JSON:
                 # 🔧 VALIDACIÓN: Asegurar que decision tiene parámetros si es SIMULATE
                 if decision.get("action") == "SIMULATE" and "parameters" not in decision:
                     decision["parameters"] = {"K": decision.get("K", 1.0)}
+
+            # INYECTAR PENSAMIENTO EN LA DECISIÓN
+            if isinstance(decision, dict):
+                decision["_internal_thoughts"] = thoughts
 
             self.prompt_cache[cache_key] = decision  # Cachear la decisión
             return decision
@@ -473,6 +488,11 @@ Parámetros Físicos Base:
 - Capacidad Inicial (K₀): {K_base:.2f} bits
 - Stock Buffer: {stock_base:.2f}
 - Liquidez: {liquidity_base:.2f}
+
+INSTRUCCIÓN DE GROUNDING SEMÁNTICO:
+- I (Entropía Externa) = Flujo de Pacientes en Urgencias: Baja volatilidad = flujo estable y predecible, Alta volatilidad = saturación crítica de urgencias.
+- K₀ (Capacidad Inicial) = Personal Médico Disponible: Baja rigidez = alta capacidad con automatización, Alta rigidez = capacidad reducida por burocracia manual.
+- Interpreta todos los cálculos y decisiones en el contexto de un hospital gestionando crisis de pacientes, no como números abstractos.
 """
                 decision = self._decide_next_step(system_prompt)
 
@@ -547,7 +567,7 @@ Parámetros Físicos Base:
 
                 self._log(f"\n📊 RESULTADO: {emoji} {status} • Tasa de colapso: {colapso_pct:.1%} • UB95: {ub95:.1%}")
 
-                # Guardar memoria episódica
+               # Guardar memoria episódica
                 ii = I / K if K > 0 else float('inf')
                 self.experiment_log.append({
                     "ciclo": iteration,
@@ -569,7 +589,8 @@ Parámetros Físicos Base:
                         "insolvencia_informacional": ii,
                         "deuda_entropica_residual": 0.0  # Placeholder, se calcula en compresión
                     },
-                    "razonamiento_previo": reasoning
+                    "razonamiento_previo": reasoning,
+                    "pensamiento_interno_gemini": decision.get("_internal_thoughts", "N/A") # <--- NUEVO CAMPO
                 })
                 
                 # -----------------------------

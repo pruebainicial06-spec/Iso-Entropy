@@ -115,15 +115,20 @@ INSTRUCCIONES CRÍTICAS:
     elif phase == AgentPhase.CONCLUDE:
         objective = """
 OBJETIVO ÚNICO:
-Realizar una auditoría concreta de fragilidad estructural basada en los experimentos realizados.
+Realizar una auditoría forense EJECUTIVA. Tu cliente NO es un físico, es un Director de Empresa.
+
+REGLA DE ORO DE TRADUCCIÓN (CRÍTICO):
+Jamás uses términos termodinámicos sin su equivalente de negocio.
+- En vez de "Entropía I=5.0", di: "Alta Volatilidad de Mercado (Nivel 5.0)".
+- En vez de "Capacidad K=0.8", di: "Capacidad de Respuesta Operativa (Nivel 0.8)".
+- En vez de "Bits", usa "Puntos de Complejidad".
+- En vez de "Theta Max", usa "Resistencia Estructural".
 
 INSTRUCCIONES:
-- Identifica el punto crítico de fallo donde la entropía superó la capacidad de control H(C).
-- Estima el horizonte de supervivencia en ciclos antes del colapso total.
-- Propón una mitigación accionable específica para reducir la deuda de entropía.
-- Sé preciso y cuantitativo en tus hallazgos.
-- Usa términos como "Insolvencia Informacional" y explica violaciones de la Ley de Ashby en el análisis final.
-- Recuerda que si I > K, el sistema es estructuralmente insolvente.
+1. Identifica el punto crítico de fallo donde la complejidad del entorno superó la capacidad de control.
+2. Estima el horizonte de supervivencia en ciclos antes del colapso total.
+3. Propón una mitigación accionable específica para reducir la deuda de riesgo.
+4. Usa términos como "Insolvencia Informacional" pero explícalos como "Incapacidad de procesar la velocidad del mercado".
 """
 
     else:
@@ -136,13 +141,13 @@ FORMATO DE RESPUESTA (MARKDOWN)
 ============================================================
 
 ### [Critical Failure Point]
-(Descripción del punto crítico de fallo identificada, incluyendo valores cuantitativos de entropía, si aplica. Por ejemplo: "El sistema superó su umbral de control H(C) = X a los N ciclos, con una deuda de entropía de Y bits.")
+(Descripción del punto crítico de fallo identificada, incluyendo valores cuantitativos de entropía traducidos a negocio. Por ejemplo: "El sistema superó su Resistencia Estructural a los N ciclos...")
 
 ### [Survival Horizon]
 (Estimación cuantitativa del horizonte de supervivencia. Por ejemplo: "El sistema colapsaría completamente en aproximadamente Z ciclos adicionales sin intervención.")
 
 ### [Actionable Mitigation]
-(Propuesta de mitigación concreta y accionable. Por ejemplo: "Se recomienda implementar un mecanismo de disipación proactiva de entropía que reduzca la deuda en un P% por ciclo, o un ajuste de K a K_nuevo para X ciclos.")
+(Propuesta de mitigación concreta y accionable. Por ejemplo: "Se recomienda implementar un mecanismo de disipación proactiva de complejidad...")
 """
     else:
         response_format = """
