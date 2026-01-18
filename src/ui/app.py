@@ -234,14 +234,14 @@ def main():
             
             # Calcular métricas finales
             if agent and agent.experiment_log:
-                last_exp = agent.experiment_log[-1]
-                # Manejo seguro de datos comprimidos o normales
-                if "resultado" in last_exp:
-                    ii = last_exp["resultado"].get("insolvencia_informacional", 0)
-                    deuda = last_exp["resultado"].get("deuda_entropica_residual", 0)
-                    colapso = last_exp["resultado"].get("tasa_de_colapso", 0)
+                valid_logs = [e for e in agent.experiment_log if "resultado" in e]
+                if not valid_logs:
+                    ii, deuda, colapso = 0, 0, 0
                 else:
-                    ii, deuda, colapso = 0, 0, 0 # Fallback
+                    last_valid = valid_logs[-1]
+                    ii = last_valid["resultado"].get("insolvencia_informacional", 0)
+                    deuda = last_valid["resultado"].get("deuda_entropica_residual", 0)
+                    colapso = last_valid["resultado"].get("tasa_de_colapso", 0)
 
                 kpi1, kpi2, kpi3, kpi4 = st.columns(4)
                 

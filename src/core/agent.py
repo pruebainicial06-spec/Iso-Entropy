@@ -3,6 +3,7 @@ import os
 import json
 import re
 import math
+import time
 from datetime import datetime
 
 import google.genai as genai
@@ -345,7 +346,7 @@ Respuesta en formato JSON:
                 if hasattr(response, 'candidates') and response.candidates:
                     for part in response.candidates[0].content.parts:
                         if hasattr(part, 'thought') and part.thought:
-                            thoughts = part.thought
+                            thoughts = part.text  # Extraer el texto del pensamiento
                             break
             except Exception:
                 pass
@@ -465,6 +466,7 @@ Respuesta en formato JSON:
 
         while iteration < MAX_ITERATIONS and self.fsm.phase != AgentPhase.CONCLUDE:
             iteration += 1
+            time.sleep(12)
             self._log(f"\n{'='*60}")
             self._log(f"🧠 CICLO DE PENSAMIENTO #{iteration}")
             self._log(f"🔍 FSM_PHASE: {self.fsm.phase_name()}")
