@@ -5,6 +5,8 @@ import os
 import sys
 from pathlib import Path
 from dotenv import load_dotenv
+import pandas as pd                 
+from datetime import datetime       
 
 # ============================================================================
 # CONFIGURACIÓN INICIAL
@@ -390,8 +392,7 @@ if start_btn:
     st.download_button(
         label="📥 Descargar Reporte (Markdown)",
         data=result,
-        file_name=f"auditoria_iso_entropia_{pd.Timestamp.now().strftime('%Y%m%d_%H%M%S')}.md",
-        mime="text/markdown"
+        file_name=f"auditoria_iso_entropia_{datetime.now().strftime('%Y%m%d_%H%M%S')}.md",
     )
     
     # INFORMACIÓN TÉCNICA
