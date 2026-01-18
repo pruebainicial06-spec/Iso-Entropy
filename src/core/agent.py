@@ -19,6 +19,85 @@ from .telemetry import build_llm_signal
 load_dotenv()
 
 
+class RateLimiter:
+    """
+    Rate limiter para respetar límite de 5 RPM de Gemini 3 Flash.
+    Gestiona cola de timestamps y backoff exponencial ante errores 429.
+    """
+    
+    def __init__(self, max_requests: int = 5, time_window: int = 60, min_interval: float = 15.0):
+        """
+        Args:
+            max_requests: Máximo número de peticiones permitidas (default: 5)
+            time_window: Ventana de tiempo en segundos (default: 60 segundos = 1 minuto)
+            min_interval: Intervalo mínimo entre peticiones en segundos (default: 15.0)
+        """
+        self.max_requests = max_requests
+        self.time_window = time_window
+        self.min_interval = min_interval
+        self.request_timestamps = []  # Cola de timestamps de últimas peticiones
+        self.backoff_multiplier = 1.0  # Multiplicador para backoff exponencial
+        self.lock = False  # Simple lock (no thread-safe, pero suficiente para uso actual)
+    
+    def wait_if_needed(self):
+        """
+        Espera el tiempo necesario para respetar el rate limit.
+        Calcula dinámicamente el tiempo de espera basado en las últimas peticiones.
+        """
+        current_time = time.time()
+        
+        # Limpiar timestamps fuera de la ventana de tiempo
+        self.request_timestamps = [
+            ts for ts in self.request_timestamps 
+            if current_time - ts < self.time_window
+        ]
+        
+        # Si ya tenemos max_requests en la ventana, esperar hasta que expire la más antigua
+        if len(self.request_timestamps) >= self.max_requests:
+            oldest_timestamp = min(self.request_timestamps)
+            wait_time = self.time_window - (current_time - oldest_timestamp) + 1.0  # +1 segundo de margen
+            if wait_time > 0:
+                self._log(f"⏳ Rate limit: esperando {wait_time:.1f}s (5 RPM alcanzado)")
+                time.sleep(wait_time)
+                current_time = time.time()
+        
+        # Asegurar intervalo mínimo entre peticiones
+        if self.request_timestamps:
+            last_request_time = max(self.request_timestamps)
+            time_since_last = current_time - last_request_time
+            if time_since_last < self.min_interval:
+                wait_time = self.min_interval - time_since_last
+                time.sleep(wait_time)
+                current_time = time.time()
+        
+        # Registrar esta petición
+        self.request_timestamps.append(current_time)
+        
+        # Limpiar nuevamente después de agregar
+        self.request_timestamps = [
+            ts for ts in self.request_timestamps 
+            if current_time - ts < self.time_window
+        ]
+    
+    def handle_rate_limit_error(self):
+        """
+        Maneja un error 429 (Too Many Requests) aplicando backoff exponencial.
+        """
+        self.backoff_multiplier *= 2.0  # Duplicar tiempo de espera
+        max_backoff = 120.0  # Máximo 2 minutos
+        backoff_time = min(self.min_interval * self.backoff_multiplier, max_backoff)
+        self._log(f"⚠️ Rate limit error (429): aplicando backoff exponencial de {backoff_time:.1f}s")
+        time.sleep(backoff_time)
+    
+    def reset_backoff(self):
+        """Resetea el multiplicador de backoff tras una petición exitosa."""
+        self.backoff_multiplier = 1.0
+    
+    def _log(self, message: str):
+        """Log interno (puede ser sobrescrito por el agente)."""
+        print(message)
+
+
 class IsoEntropyAgent:
     """
     Agente Iso-Entropy con:
@@ -33,8 +112,8 @@ class IsoEntropyAgent:
     # =========================================================
     STABILITY_THRESHOLD = 0.05
     MARGINAL_THRESHOLD = 0.15
-    FORCED_ATTEMPTS = 2
-    DELTA_K_STEP = 1.0
+    FORCED_ATTEMPTS = 3  # Aumentado de 2 a 3 para casos críticos
+    DELTA_K_STEP = 1.5  # Aumentado de 1.0 a 1.5 para incrementos más agresivos
     REPLICA_RUNS = 1000
     
     # Parámetros de accesibilidad estructural
@@ -65,6 +144,9 @@ class IsoEntropyAgent:
         self.experiment_log = []
         self.fsm = IsoEntropyFSM()
         self.prompt_cache = {}  # Cache para prompts repetitivos
+        self.rate_limiter = RateLimiter(max_requests=5, time_window=60, min_interval=15.0)
+        # Conectar el log del rate limiter con el del agente
+        self.rate_limiter._log = self._log
 
     # =========================================================
     # LOGGING
@@ -201,6 +283,9 @@ Respuesta en formato JSON:
             }
 
         try:
+            # Rate limiting antes de llamada a API
+            self.rate_limiter.wait_if_needed()
+            
             generate_content_config = types.GenerateContentConfig(
                 temperature=0.25,
                 thinking_config=types.ThinkingConfig(
@@ -209,11 +294,27 @@ Respuesta en formato JSON:
                 ),
             )
 
-            response = self.client.models.generate_content(
-                model=self.model_name,
-                contents=prompt,
-                config=generate_content_config
-            )
+            try:
+                response = self.client.models.generate_content(
+                    model=self.model_name,
+                    contents=prompt,
+                    config=generate_content_config
+                )
+                self.rate_limiter.reset_backoff()  # Resetear backoff tras éxito
+            except Exception as api_error:
+                # Manejar errores 429 (Rate Limit)
+                if "429" in str(api_error) or "rate limit" in str(api_error).lower():
+                    self.rate_limiter.handle_rate_limit_error()
+                    # Reintentar una vez después del backoff
+                    self.rate_limiter.wait_if_needed()
+                    response = self.client.models.generate_content(
+                        model=self.model_name,
+                        contents=prompt,
+                        config=generate_content_config
+                    )
+                    self.rate_limiter.reset_backoff()
+                else:
+                    raise
 
             summary = self._extract_json(response.text)
             return {"compressed": True, "summary": summary}
@@ -323,7 +424,10 @@ Respuesta en formato JSON:
 
         # --- INICIO DEL CAMBIO QUIRÚRGICO ---
         
-        # 1. Configuración para activar Thinking
+        # 1. Rate limiting antes de llamada a API
+        self.rate_limiter.wait_if_needed()
+        
+        # 2. Configuración para activar Thinking
         generate_content_config = types.GenerateContentConfig(
             temperature=0.25,
             thinking_config=types.ThinkingConfig(
@@ -333,26 +437,48 @@ Respuesta en formato JSON:
         )
 
         try:
-            response = self.client.models.generate_content(
-                model=self.model_name,
-                contents=prompt,
-                config=generate_content_config
-            )
+            try:
+                response = self.client.models.generate_content(
+                    model=self.model_name,
+                    contents=prompt,
+                    config=generate_content_config
+                )
+                self.rate_limiter.reset_backoff()  # Resetear backoff tras éxito
+            except Exception as api_error:
+                # Manejar errores 429 (Rate Limit)
+                if "429" in str(api_error) or "rate limit" in str(api_error).lower():
+                    self.rate_limiter.handle_rate_limit_error()
+                    # Reintentar una vez después del backoff
+                    self.rate_limiter.wait_if_needed()
+                    response = self.client.models.generate_content(
+                        model=self.model_name,
+                        contents=prompt,
+                        config=generate_content_config
+                    )
+                    self.rate_limiter.reset_backoff()
+                else:
+                    raise
 
-            # 2. Capturar Pensamientos (Lógica segura para evitar errores)
+            # 3. Capturar Pensamientos (Lógica segura para evitar errores)
             thoughts = "No disponible"
             try:
-                # Intentar extraer thoughts de los candidatos
+                # Intentar extraer thoughts de los candidatos según documentación Gemini 3
                 if hasattr(response, 'candidates') and response.candidates:
                     for part in response.candidates[0].content.parts:
                         if hasattr(part, 'thought') and part.thought:
-                            thoughts = part.text  # Extraer el texto del pensamiento
+                            # CORRECCIÓN: part.thought puede tener .text o ser directamente texto
+                            if hasattr(part.thought, 'text'):
+                                thoughts = part.thought.text
+                            elif isinstance(part.thought, str):
+                                thoughts = part.thought
+                            elif hasattr(part.thought, '__str__'):
+                                thoughts = str(part.thought)
                             break
-            except Exception:
-                pass
+            except Exception as e:
+                self._log(f"⚠️ Error extrayendo thinking: {e}")
 
-            # 3. Loguear el pensamiento para que aparezca en la UI (app.py)
-            if thoughts != "No disponible":
+            # 4. Loguear el pensamiento para que aparezca en la UI (app.py)
+            if thoughts != "No disponible" and isinstance(thoughts, str):
                 self._log(f"\n🧠 PENSAMIENTO (Chain-of-Thought):\n{thoughts}\n")
 
         # --- FIN DEL CAMBIO QUIRÚRGICO ---
@@ -466,7 +592,7 @@ Respuesta en formato JSON:
 
         while iteration < MAX_ITERATIONS and self.fsm.phase != AgentPhase.CONCLUDE:
             iteration += 1
-            time.sleep(12)
+            # Rate limiting ahora se maneja automáticamente antes de cada llamada a la API
             self._log(f"\n{'='*60}")
             self._log(f"🧠 CICLO DE PENSAMIENTO #{iteration}")
             self._log(f"🔍 FSM_PHASE: {self.fsm.phase_name()}")
@@ -544,7 +670,23 @@ INSTRUCCIÓN DE GROUNDING SEMÁNTICO:
                 # 🔒 CLAMP FÍSICO Y ACTION GATE
                 # -----------------------------
                 K = max(0.1, min(10.0, K_proposed))
-                MAX_K_STEP = 0.75
+                
+                # Lógica adaptativa: MAX_K_STEP aumenta si colapso previo fue ≥ 95%
+                MAX_K_STEP = 0.75  # Valor base
+                if self.experiment_log:
+                    # Verificar últimos 2 experimentos para detectar colapsos persistentes
+                    recent_collapses = [
+                        exp.get("resultado", {}).get("tasa_de_colapso", 0.0)
+                        for exp in self.experiment_log[-2:]
+                        if exp.get("resultado")
+                    ]
+                    if recent_collapses:
+                        max_recent_collapse = max(recent_collapses)
+                        # Si colapso ≥ 95%, permitir incrementos más agresivos
+                        if max_recent_collapse >= 0.95:
+                            MAX_K_STEP = 1.5
+                            self._log(f"   🔧 MAX_K_STEP aumentado a {MAX_K_STEP} (colapso previo: {max_recent_collapse:.1%})")
+                
                 K = max(K_base - MAX_K_STEP, min(K, K_base + MAX_K_STEP))
 
                 self._log(f"   🌍 Grounded State → I={I:.2f}, K_base={K_base:.2f}, stock={stock:.2f}, liquidity={liq:.2f}")
@@ -847,6 +989,9 @@ Historial de Experimentos (resumido):
             if self.is_mock_mode:
                 final_llm_report = "### [Critical Failure Point]\nMock: Sistema alcanzó punto crítico de fallo.\n\n### [Survival Horizon]\nMock: Horizonte de supervivencia estimado.\n\n### [Actionable Mitigation]\nMock: Propuesta de mitigación accionable."
             else:
+                # Rate limiting antes de llamada a API
+                self.rate_limiter.wait_if_needed()
+                
                 generate_content_config = types.GenerateContentConfig(
                     temperature=0.25,
                     thinking_config=types.ThinkingConfig(
@@ -855,12 +1000,29 @@ Historial de Experimentos (resumido):
                     ),
                 )
                 try:
-                    response = self.client.models.generate_content(
-                        model=self.model_name,
-                        contents=final_report_prompt,
-                        config=generate_content_config
-                    )
-                    final_llm_report = response.text
+                    try:
+                        response = self.client.models.generate_content(
+                            model=self.model_name,
+                            contents=final_report_prompt,
+                            config=generate_content_config
+                        )
+                        self.rate_limiter.reset_backoff()  # Resetear backoff tras éxito
+                        final_llm_report = response.text
+                    except Exception as api_error:
+                        # Manejar errores 429 (Rate Limit)
+                        if "429" in str(api_error) or "rate limit" in str(api_error).lower():
+                            self.rate_limiter.handle_rate_limit_error()
+                            # Reintentar una vez después del backoff
+                            self.rate_limiter.wait_if_needed()
+                            response = self.client.models.generate_content(
+                                model=self.model_name,
+                                contents=final_report_prompt,
+                                config=generate_content_config
+                            )
+                            self.rate_limiter.reset_backoff()
+                            final_llm_report = response.text
+                        else:
+                            raise
                 except Exception as e:
                     self._log(f"Error al generar reporte final en fase CONCLUDE: {e}")
                     final_llm_report = f"Error al generar reporte final: {e}"

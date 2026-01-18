@@ -234,14 +234,14 @@ def main():
             
             # Calcular métricas finales
             if agent and agent.experiment_log:
-                valid_logs = [e for e in agent.experiment_log if "resultado" in e]
+                valid_logs = [e for e in agent.experiment_log if e.get("resultado") and e.get("hipotesis")]
                 if not valid_logs:
                     ii, deuda, colapso = 0, 0, 0
                 else:
                     last_valid = valid_logs[-1]
-                    ii = last_valid["resultado"].get("insolvencia_informacional", 0)
-                    deuda = last_valid["resultado"].get("deuda_entropica_residual", 0)
-                    colapso = last_valid["resultado"].get("tasa_de_colapso", 0)
+                    ii = last_valid.get("resultado", {}).get("insolvencia_informacional", 0)
+                    deuda = last_valid.get("resultado", {}).get("deuda_entropica_residual", 0)
+                    colapso = last_valid.get("resultado", {}).get("tasa_de_colapso", 0)
 
                 kpi1, kpi2, kpi3, kpi4 = st.columns(4)
                 
@@ -292,15 +292,18 @@ def main():
             with tab_charts:
                 if agent and agent.experiment_log:
                     try:
-                        # Filtrar logs válidos (no comprimidos)
-                        valid_logs = [e for e in agent.experiment_log if "resultado" in e]
+                        # Filtrar logs válidos (no comprimidos) con validación defensiva
+                        valid_logs = [
+                            e for e in agent.experiment_log 
+                            if e.get("resultado") and e.get("hipotesis")
+                        ]
                         if valid_logs:
                             df = pd.DataFrame([
                                 {
-                                    "Ciclo": str(e["ciclo"]),
-                                    "K (Capacidad)": e["hipotesis"]["K"],
-                                    "Colapso (%)": e["resultado"]["tasa_de_colapso"] * 100,
-                                    "Deuda Entrópica": e["resultado"].get("deuda_entropica_residual", 0)
+                                    "Ciclo": str(e.get("ciclo", "N/A")),
+                                    "K (Capacidad)": e.get("hipotesis", {}).get("K", 0.0),
+                                    "Colapso (%)": e.get("resultado", {}).get("tasa_de_colapso", 0.0) * 100,
+                                    "Deuda Entrópica": e.get("resultado", {}).get("deuda_entropica_residual", 0.0)
                                 } for e in valid_logs
                             ])
                             

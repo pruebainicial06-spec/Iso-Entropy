@@ -34,22 +34,54 @@ def build_llm_signal(experiment_log: List[Dict]) -> Dict:
                 "compressed_summary": str(summary)
             }
 
-    # Extraer tasas de colapso
-    collapse_rates = [exp["resultado"]["tasa_de_colapso"] for exp in experiment_log]
-    k_values = [exp["hipotesis"]["K"] for exp in experiment_log]
-    theta_max_values = [exp["parametros_completos"].get("theta_max", 0.0) for exp in experiment_log if "parametros_completos" in exp]
+    # Filtrar entradas inválidas (sin resultado o sin hipotesis)
+    valid_experiments = [
+        exp for exp in experiment_log 
+        if exp.get("resultado") and exp.get("hipotesis")
+    ]
+    
+    if not valid_experiments:
+        return {
+            "experiments": len(experiment_log),
+            "min_collapse_rate": 0.0,
+            "max_collapse_rate": 0.0,
+            "avg_collapse_rate": 0.0,
+            "last_collapse_rate": 0.0,
+            "last_K": 0.0,
+            "k_range": "0.00 - 0.00",
+            "theta_max_range": "0.00 - 0.00",
+            "entropy_debt_accumulated": 0.0,
+            "last_theta_max": 0.0,
+            "overall_trend": "none"
+        }
+    
+    # Extraer tasas de colapso con validación defensiva
+    collapse_rates = [
+        exp.get("resultado", {}).get("tasa_de_colapso", 0.0) 
+        for exp in valid_experiments
+    ]
+    k_values = [
+        exp.get("hipotesis", {}).get("K", 0.0) 
+        for exp in valid_experiments
+    ]
+    theta_max_values = [
+        exp.get("parametros_completos", {}).get("theta_max", 0.0) 
+        for exp in valid_experiments 
+        if exp.get("parametros_completos")
+    ]
     
     # Calcular deuda de entropía acumulada (I - K no disipada)
     entropy_debt = 0.0
-    for exp in experiment_log:
-        I = exp["hipotesis"].get("I", 0.0)
-        K = exp["hipotesis"].get("K", 0.0)
+    for exp in valid_experiments:
+        I = exp.get("hipotesis", {}).get("I", 0.0)
+        K = exp.get("hipotesis", {}).get("K", 0.0)
+        collapse_rate = exp.get("resultado", {}).get("tasa_de_colapso", 0.0)
         if I > K:
-            entropy_debt += (I - K) * exp["resultado"]["tasa_de_colapso"]  # Ponderada por probabilidad de colapso
+            entropy_debt += (I - K) * collapse_rate  # Ponderada por probabilidad de colapso
 
     # Estadísticas resumidas
     signal = {
-        "experiments": len(experiment_log),
+        "experiments": len(valid_experiments),
         "min_collapse_rate": min(collapse_rates),
         "max_collapse_rate": max(collapse_rates),
         "avg_collapse_rate": sum(collapse_rates) / len(collapse_rates),
