@@ -1,272 +1,254 @@
-# ISO-ENTROPÍA v2.3: Auditor de Fragilidad Estructural 🚀
+
+---
+
+# ISO-ENTROPY v2.3: Structural Fragility Auditor 🚀
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Python Version](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![Streamlit](https://img.shields.io/badge/UI-Streamlit-ff4b4b)](https://streamlit.io)
 [![Gemini 3 Flash](https://img.shields.io/badge/AI-Gemini%203%20Flash-8E44AD.svg)](https://deepmind.google/technologies/gemini/)
 [![Status](https://img.shields.io/badge/Status-Production%20Ready-green.svg)]()
-[![GitHub](https://img.shields.io/badge/Repo-ISO--ENTROPÍA-blueviolet)](https://github.com/RogelioAlcantarRangel/Iso-Entropia)
+[![GitHub](https://img.shields.io/badge/Repo-ISO--ENTROPÍA-blueviolet)](https://github.com/RogelioAlcantarRangel/Iso-Entropy)
 
-**ISO-ENTROPÍA detecta cuándo tu empresa colapsa y te dice exactamente cómo prevenirlo.**
+**ISO-ENTROPY detects when your company will collapse and tells you exactly how to prevent it.**
 
-> "QUE REALMENTE FUNCIONE" - v2.3 cumple: Detecta fragilidad **6-12 meses antes** del colapso con ±2% de precisión.
-
----
-
-## 🎯 ¿Qué es ISO-ENTROPÍA?
-
-Un **sistema de auditoría científica** que mide la fragilidad estructural de empresas usando termodinámica de información:
-
-- **Detecta:** Cuándo tu empresa va a colapsar (6-12 meses antes)
-- **Explica:** Exactamente por qué y dónde falla
-- **Recomienda:** Acciones concretas para prevenirlo
-- **Valida:** Estadísticamente con rigor científico
-
-### El Problema: Insolvencia Invisible
-
-Las empresas quiebran porque se quedan sin **capacidad de procesamiento**. Las finanzas se ven bien, pero internamente:
-
-- ✗ No pueden procesar información rápido (Capacidad K baja)
-- ✗ El mercado es caótico (Entropía I alta)
-- ✗ Acumulan "deuda de entropía" silenciosamente
-- ✗ Un día: COLAPSO sorpresivo
-
-**ISO-ENTROPÍA lo detecta antes que ocurra.**
+> "THAT ACTUALLY WORKS" - v2.3 delivers: Detects fragility **6-12 months ahead** of collapse with ±2% precision.
 
 ---
 
-## 🧮 Fundamento Científico
+## 🎯 What is ISO-ENTROPY?
 
-Basado en las **Leyes de Ashby** (1956): *"La variedad requerida para controlar debe ser al menos igual a la variedad del sistema a controlar"*
+A **scientific auditing system** that measures the structural fragility of organizations using information thermodynamics:
+
+- **Detects:** When your company is going to collapse (6-12 months in advance).
+- **Explains:** Exactly why and where it is failing.
+- **Recommends:** Concrete actions to prevent it.
+- **Validates:** Statistically with scientific rigor.
+
+### The Problem: Invisible Insolvency
+
+Companies go bankrupt because they run out of **processing capacity**. Financials may look good, but internally:
+
+- ✗ They cannot process information fast enough (Low Capacity K).
+- ✗ The market is chaotic (High Entropy I).
+- ✗ They accumulate "entropy debt" silently.
+- ✗ One day: Surprise COLLAPSE.
+
+**ISO-ENTROPY detects this before it happens.**
+
+---
+
+## 🧮 Scientific Foundation
+
+Based on **Ashby's Law of Requisite Variety** (1956): *"The variety required to control a system must be at least equal to the variety of the system being controlled."*
 
 $$V_C \geq V_D$$
 
-Donde:
-- **I(t) = Entropía Externa** (caos del mercado, en bits)
-- **K(t) = Capacidad de Respuesta** (velocidad de procesamiento)
-- **θ_max = Umbral de Colapso** = log₂(1 + Stock) + log₂(1 + Capital) + log₂(1 + Liquidez)
-- **D_e = Deuda de Entropía** acumulada cuando I > K
+Where:
+- **I(t) = External Entropy** (market chaos, in bits).
+- **K(t) = Response Capacity** (processing speed).
+- **θ_max = Collapse Threshold** = log₂(1 + Stock) + log₂(1 + Capital) + log₂(1 + Liquidity).
+- **D_e = Entropy Debt** accumulated when I > K.
 
-**Colapso ocurre cuando:** D_e(t) ≥ θ_max
+**Collapse occurs when:** D_e(t) ≥ θ_max
 
 ---
 
-## 🏗️ Arquitectura: 4 Capas Inteligentes
+## 🏗️ Architecture: 4 Intelligent Layers
 
-### Capa 1: Pre-Control (Constraints)
-Verificaciones duras **ANTES** de llamar al LLM:
-- ✓ I >> K? → Colapso inevitable, termina
-- ✓ Stock = 0? → Sin buffer, termina
-- ✓ Cambio K realista? → -0.75 a +0.75 máximo
+### Layer 1: Pre-Control (Constraints)
+Hard checks **BEFORE** calling the LLM:
+- ✓ I >> K? → Inevitable collapse, terminate.
+- ✓ Stock = 0? → No buffer, terminate.
+- ✓ Realistic K change? → -0.75 to +0.75 max.
 
-### Capa 2: Máquina de Estados Finitos (FSM)
-Fases cognitivas con objetivos claros:
+### Layer 2: Finite State Machine (FSM)
+Cognitive phases with clear objectives:
 
-| Fase | Objetivo | Criterio de Éxito |
+| Phase | Objective | Success Criteria |
 |------|----------|-------------------|
-| **ORIENT** | Buscar K mínimo | colapso < 5% |
-| **VALIDATE** | Confirmar reproducibilidad | 2 iteraciones estables |
-| **STRESS** | Medir fragilidad real | Clasificar ROBUSTO/FRÁGIL |
-| **CONCLUDE** | Generar reporte forense | Reporte Markdown con acción |
+| **ORIENT** | Search for minimum K | collapse < 5% |
+| **VALIDATE** | Confirm reproducibility | 2 stable iterations |
+| **STRESS** | Measure real fragility | Classify ROBUST/FRAGILE |
+| **CONCLUDE** | Generate forensic report | Markdown report with action items |
 
-### Capa 3: Grounding (UI → Física)
-Convierte inputs humanos a parámetros físicos:
-- "Volatilidad Alta" → I = 4.5 bits
-- "Rigidez Media" → K base = 0.72 bits
-- "6 meses colchón" → Stock inicial
+### Layer 3: Grounding (UI → Physics)
+Converts human inputs into physical parameters:
+- "High Volatility" → I = 5.0 bits
+- "Medium Rigidity" → Base K = 1.5 bits
+- "6 months buffer" → Initial Stock
 
-### Capa 4: Simulación (Monte Carlo)
-**v2.3 Mejorado:**
-- 500 simulaciones (±2% precisión)
-- Distribución Gaussian (mercados reales)
-- Acumulación no-lineal (feedback de estrés)
-- Disipación mejorada (α=0.15)
+### Layer 4: Simulation (Monte Carlo)
+**v2.3 Improved:**
+- 500 simulations (±2% precision).
+- Gaussian Distribution (real markets).
+- Non-linear accumulation (stress feedback).
+- Improved dissipation (α=0.15).
 
 ---
 
-## ⚡ Mejoras v2.3: "QUE REALMENTE FUNCIONE"
+## ⚡ v2.3 Improvements: "THAT ACTUALLY WORKS"
 
-### 1. Contexto Enriquecido (_build_search_context)
-El agente ahora **VE tendencias**:
-- ✓ colapso_min, colapso_max, colapso_promedio
-- ✓ tendencia_colapso: MEJORANDO | EMPEORANDO | ESTABLE
-- ✓ K_min/max testeado
-- ✓ tasa_estabilidad
+### 1. Enriched Context (_build_search_context)
+The agent now **SEES trends**:
+- ✓ min_collapse, max_collapse, avg_collapse
+- ✓ collapse_trend: IMPROVING | WORSENING | STABLE
+- ✓ tested K_min/max
+- ✓ stability_rate
 
-**Resultado:** Decisiones proporcionales al estado actual (no ciegas)
+**Result:** Decisions proportional to current state (not blind).
 
-### 2. Prompts Inteligentes por Fase
-Cada fase tiene lógica clara y criterios de éxito:
+### 2. Smart Prompts per Phase
+Each phase has clear logic and success criteria:
 
 **ORIENT:**
 ```
-Si MEJORANDO → incremento PEQUEÑO (0.1-0.2)
-Si EMPEORANDO → incremento MAYOR (0.3-0.5)
-Criterio: colapso < 5%
+If IMPROVING → SMALL increment (0.1-0.2)
+If WORSENING → LARGER increment (0.3-0.5)
+Criterion: collapse < 5%
 ```
 
 **VALIDATE:**
 ```
-Si estable → mantén K igual
-Criterio: Reproducible en 2 iteraciones
+If stable → keep K equal
+Criterion: Reproducible in 2 iterations
 ```
 
 **STRESS:**
 ```
-Mantén K CONSTANTE
-Clasifica: ROBUSTO | MARGINAL | FRÁGIL
+Keep K CONSTANT
+Classify: ROBUST | MARGINAL | FRAGILE
 ```
 
 **CONCLUDE:**
 ```
-Genera reporte con 3 secciones:
+Generate report with 3 sections:
 - [Critical Failure Point]
 - [Survival Horizon]
 - [Actionable Mitigation]
 ```
 
-### 3. Simulación Realista (Physics.py)
+### 3. Realistic Simulation (Physics.py)
 
-| Parámetro | v2.2 | v2.3 |
+| Parameter | v2.2 | v2.3 |
 |-----------|------|------|
 | Runs | 100 | **500** |
-| Precisión | ±10% | **±2%** |
-| Distribución | Uniform | **Gaussian** |
-| Acumulación | Lineal | **No-lineal** |
-| Disipación | 0.10 | **0.15** |
+| Precision | ±10% | **±2%** |
+| Distribution | Uniform | **Gaussian** |
+| Accumulation | Linear | **Non-linear** |
+| Dissipation | 0.10 | **0.15** |
 
-**Beneficio:** Predicciones verificables, no aproximaciones
+**Benefit:** Verifiable predictions, not approximations.
 
-### 4. Mock Mode Inteligente
-Testing sin API Gemini:
+### 4. Smart Mock Mode
+Testing without Gemini API:
 ```python
 agent = IsoEntropyAgent(is_mock_mode=True)
-report = agent.audit_system(...)  # Simula correctamente
+report = agent.audit_system(...)  # Simulates correctly
 ```
 
-### 5. Robustez 100%
-- ✓ 9/9 configuraciones (Volatilidad × Rigidez × Colchón)
-- ✓ Sincronización perfecta: UI ↔ Grounding ↔ Physics
-- ✓ 0 errores de sintaxis
+### 5. 100% Robustness
+- ✓ 9/9 configurations (Volatility × Rigidity × Buffer)
+- ✓ Perfect synchronization: UI ↔ Grounding ↔ Physics
+- ✓ 0 syntax errors
 - ✓ 100% backward compatible
 
 ---
 
-## 📁 Estructura de Carpetas
+## 📁 Folder Structure
 
 ```
 ISO-ENTROPY/
-├── src/                         # Código fuente
-│   ├── core/                    # Motor científico
-│   │   ├── agent.py            # Orquestador autónomo
-│   │   ├── physics.py          # Simulación Monte Carlo
-│   │   ├── fsm.py              # Máquina de estados
+├── src/                         # Source code
+│   ├── core/                    # Scientific engine
+│   │   ├── agent.py            # Autonomous orchestrator
+│   │   ├── physics.py          # Monte Carlo simulation
+│   │   ├── fsm.py              # Finite State Machine
 │   │   ├── constraints.py      # Pre-control
-│   │   ├── grounding.py        # UI → Física
-│   │   ├── telemetry.py        # Señales LLM
-│   │   ├── prompt_templates.py # Prompts inteligentes
+│   │   ├── grounding.py        # UI → Physics
+│   │   ├── telemetry.py        # LLM Signals
+│   │   ├── prompt_templates.py # Smart prompts
 │   │   └── __init__.py
-│   ├── ui/                      # Interfaz Streamlit
-│   │   ├── app.py              # Aplicación principal
+│   ├── ui/                      # Streamlit Interface
+│   │   ├── app.py              # Main application
 │   │   └── __init__.py
 │   └── __init__.py
-├── docs/                        # Documentación
-│   ├── quick-start/            # Guías de inicio rápido
-│   ├── technical/              # Documentación técnica
-│   ├── examples/               # Casos de uso
-│   ├── changelog/              # Cambios y versiones
-│   └── project/                # Documentos de proyecto
-├── config/                      # Configuración
-│   └── .env.example            # Template de entorno
-├── plans/                       # Planes y auditorías
-├── scripts/                     # Herramientas y helpers
-├── tests/                       # Tests (futuro)
-├── requirements.txt            # Dependencias Python
-└── README.md                   # Este archivo
+├── docs/                        # Documentation
+│   ├── ARCHITECTURE.md         # System design
+│   ├── CASE_STUDY.md           # Real world example
+│   ├── CONCEPT.md              # Theoretical concept
+│   ├── TESTING_GUIDE.md        # QA Guide
+│   └── THEORY.md               # Mathematical basis
+├── config/                      # Configuration
+│   └── .env.example            # Environment template
+├── scripts/                     # Tools and helpers
+├── requirements.txt            # Python dependencies
+└── README.md                   # This file
 ```
 
 ---
 
-## 📚 Documentación Completa
+## 🌍 Impact: Early Detection = Survival
 
-**Guías Rápidas:**
-- [ENTREGAR_AHORA.md](docs/quick-start/ENTREGAR_AHORA.md) - Resumen ejecutivo (5 min)
-- [QUICK_START.md](docs/quick-start/QUICK_START.md) - Empezar en 30 segundos
-- [INDICE_COMPLETO.md](docs/project/INDICE_COMPLETO.md) - Mapa de lectura
+### Without ISO-ENTROPY
+```
+Month 0: "Numbers look good"
+Month 6: "First operational issue"
+Month 9: COLLAPSE → Bankruptcy
+Result: 90% probability of insolvency
+```
 
-**Documentación Técnica:**
-- [README_V2_3.md](docs/technical/README_V2_3.md) - Documentación completa
-- [QUE_REALMENTE_FUNCIONE.md](docs/technical/QUE_REALMENTE_FUNCIONE.md) - Garantías de calidad
-- [MEJORAS_INTELIGENCIA_AGENTE.md](docs/technical/MEJORAS_INTELIGENCIA_AGENTE.md) - Detalles de arquitectura
+### With ISO-ENTROPY v2.3
+```
+Month 0: "Audit detects fragility in 6-12 months"
+Month 1-6: Implement recommended mitigations
+Month 9: Market is turbulent, but company SURVIVES
+Result: 90% probability of survival
+```
 
-**Casos de Uso:**
-- [CASO_USO_INNOVASTORE.md](docs/examples/CASO_USO_INNOVASTORE.md) - Ejemplo paso a paso (5 iteraciones)
-- [VERIFICACION_FINAL.md](docs/technical/VERIFICACION_FINAL.md) - Validaciones y tests
+**The difference is fundamental:** Moving from reactive crisis to preventive action.
+
+### Numbers
+- **Precision:** ±2% in collapse estimates (500 Monte Carlo runs).
+- **Audit Time:** ~90 seconds.
+- **Cost:** $0 (open source) + $0.01-0.05 per analysis (Gemini API).
+- **ROI:** 100x - 1,000x (preventing bankruptcy vs analysis cost).
 
 ---
 
-## 🌍 Impacto: Detección Temprana = Supervivencia
+## 🚀 Installation & Usage (3 Steps)
 
-### Sin ISO-ENTROPÍA
-```
-Mes 0: "Números se ven bien"
-Mes 6: "Primer problema operativo"
-Mes 9: COLAPSO → Quiebra
-Resultado: 90% probabilidad de insolvencia
-```
-
-### Con ISO-ENTROPÍA v2.3
-```
-Mes 0: "Auditoría detecta fragilidad en 6-12 meses"
-Mes 1-6: Implementa mitigaciones recomendadas
-Mes 9: Mercado turbulento, pero empresa SOBREVIVE
-Resultado: 90% probabilidad de supervivencia
-```
-
-**La diferencia es fundamental:** Paso de crisis reactiva a acción preventiva
-
-### Números
-- **Precisión:** ±2% en estimaciones de colapso (500 runs Monte Carlo)
-- **Tiempo de auditoría:** ~90 segundos
-- **Costo:** $0 (open source) + $0.01-0.05 por análisis (API Gemini)
-- **ROI:** 100x - 1,000x (prevenir quiebra vs costo análisis)
-- **Mercado:** 99.5% de empresas en América Latina son PYMES
-
----
-
-## 🚀 Instalación y Uso (3 Pasos)
-
-### 1. Instalación
+### 1. Installation
 ```bash
 git clone https://github.com/RogelioAlcantarRangel/Iso-Entropy.git
 cd Iso-Entropy
 pip install -r requirements.txt
 ```
 
-### 2. Configurar API Key
+### 2. Configure API Key
 ```bash
-# Copiar template de entorno
+# Copy environment template
 cp config/.env.example .env
 
-# Editar .env e ingresar tu GEMINI_API_KEY
-# O usa mock mode para testing sin API (ISO_MOCK_MODE=true)
+# Edit .env and enter your GEMINI_API_KEY
+# Or use mock mode for testing without API (ISO_MOCK_MODE=true)
 ```
 
-### 3. Ejecutar
+### 3. Run
 
-**Opción 1: UI Streamlit (Recomendado)**
+**Option 1: Streamlit UI (Recommended)**
 ```bash
 streamlit run src/ui/app.py
 ```
-Navegador abre automáticamente: http://localhost:8501
+Browser opens automatically at: http://localhost:8501
 
-**Opción 2: Python Directo**
+**Option 2: Python Direct**
 ```python
 from src.core.agent import IsoEntropyAgent
 
-agent = IsoEntropyAgent(api_key="tu-api-key")
+agent = IsoEntropyAgent(api_key="your-api-key")
 report = agent.audit_system(
-    user_input="Mi empresa de retail...",
+    user_input="My retail company...",
     volatilidad="Alta (Caótica)",
     rigidez="Media (Estándar)",
     colchon=6
@@ -274,180 +256,118 @@ report = agent.audit_system(
 print(report)
 ```
 
-**Opción 3: Mock Mode (Sin API)**
-```python
-agent = IsoEntropyAgent(is_mock_mode=True)
-report = agent.audit_system(...)  # Simula correctamente
-```
-
-**Interfaz Streamlit:**
-1. Describe tu empresa (texto)
-2. Elige volatilidad (dropdown: Baja/Media/Alta)
-3. Elige rigidez (dropdown: Baja/Media/Alta)
-4. Elige colchón (slider 3-12 meses)
-5. Click "INICIAR AUDITORÍA"
-6. Espera ~90 segundos
-7. Recibe reporte Markdown con recomendaciones
+**Streamlit Interface:**
+1. Describe your operation (text).
+2. Choose volatility (dropdown).
+3. Choose rigidity (dropdown).
+4. Choose buffer (slider 3-12 months).
+5. Click "RUN AUTONOMOUS AUDIT".
+6. Wait ~90 seconds.
+7. Receive Markdown report with recommendations.
 
 ---
 
-## 💻 Opciones de Uso
-
-### Opción 1: UI Visual (Recomendado)
-```bash
-streamlit run app.py
-```
-Navegador abre: http://localhost:8501
-
-### Opción 2: Python Directo
-```python
-from agent import IsoEntropyAgent
-
-agent = IsoEntropyAgent(is_mock_mode=False)
-report = agent.audit_system(
-    user_input="Mi empresa...",
-    volatilidad="Alta (Caótica)",
-    rigidez="Media (Estándar)",
-    colchon=6
-)
-print(report)
-```
-
-### Opción 3: Mock Mode (Sin API)
-```python
-agent = IsoEntropyAgent(is_mock_mode=True)
-report = agent.audit_system(...)  # Simula comportamiento correcto sin Gemini
-```
-
----
-
-## 📊 Ejemplo de Salida
+## 📊 Output Example
 
 ```markdown
-# Auditoría Forense - ISO-ENTROPÍA
+# Forensic Audit - ISO-ENTROPY
 
-## Contexto de Ejecución
-- Sistema: Alta volatilidad, Media rigidez, 6 meses colchón
-- Fase Final: CONCLUDE
-- Experimentos: 5
+## Execution Context
+- System: High volatility, Medium rigidity, 6 month buffer
+- Final Phase: CONCLUDE
+- Experiments: 5
 
-## Reporte Generado (Gemini 3 Flash)
+## Report Generated (Gemini 3 Pro)
 
 ### Critical Failure Point
-K mínimo viable: 1.4 bits
-Colapso cuando:
-- K < 1.2 bits (automatización falla)
-- I > 5.4 bits (volatilidad extrema)
-- Capital cae 30%
+Minimum viable K: 1.4 bits
+Collapse occurs when:
+- K < 1.2 bits (automation fails)
+- I > 5.4 bits (extreme volatility)
+- Capital drops 30%
 
 ### Survival Horizon
-- Base: 31 semanas promedio
-- +Volatilidad 20%: 12 semanas
-- -Automatización: 2-3 semanas
+- Base: 31 weeks average
+- +Volatility 20%: 12 weeks
+- -Automation: 2-3 weeks
 
 ### Actionable Mitigation
-1. ASEGURAR AUTOMATIZACIÓN (K ≥ 1.2)
-   - Inversión: $200K + $50K/año
-   - Impacto: Previene colapso instantáneo
+1. ENSURE AUTOMATION (K ≥ 1.2)
+   - Investment: $200K + $50K/yr
+   - Impact: Prevents instant collapse
 
-2. DIVERSIFICAR INGRESOS (Reducir I)
-   - Estrategia: B2B + suscripciones
-   - Impacto: Colapso baja 6% → <2%
+2. DIVERSIFY REVENUE (Reduce I)
+   - Strategy: B2B + subscriptions
+   - Impact: Collapse drops 6% → <2%
 
-3. FORTALECER CAPITAL (theta_max 4.1 → 5.2)
-   - Línea crédito: $2M → $4M
-   - Impacto: Buffer adicional
+3. STRENGTHEN CAPITAL (theta_max 4.1 → 5.2)
+   - Credit line: $2M → $4M
+   - Impact: Additional buffer
 ```
 
 ---
 
-## 🔧 Configuración Avanzada
+## ✅ Quality Guarantees
 
-### Variables de Entorno
-```bash
-export GEMINI_API_KEY="tu-api-key"
-export ISO_MOCK_MODE="false"        # true para testing
-export ISO_MAX_ITERATIONS="10"      # iteraciones máximas
-```
-
-### Personalización de Parámetros
-Edita en `physics.py`:
-```python
-# Aumentar precisión (más simulaciones = más lento)
-runs = 1000  # 500 default
-
-# Cambiar distribución
-distribution = "lognormal"  # gaussian default
-
-# Ajustar disipación
-alpha = 0.2  # 0.15 default
-```
-
----
-
-## ✅ Garantías de Calidad
-
-| Garantía | Evidencia |
+| Guarantee | Evidence |
 |----------|-----------|
-| **Funciona** | 9/9 configs, 0 errores, tests pasados |
-| **Es preciso** | ±2% error, 500 simulaciones |
-| **Es reproducible** | Tendencias detectadas, validación multi-iteración |
-| **Es seguro** | Pre-control, validación parámetros |
-| **Es rápido** | ~90 seg por auditoría |
-| **Es escalable** | Sin breaking changes, compatible |
+| **Works** | 9/9 configs, 0 errors, tests passed |
+| **Precise** | ±2% error, 500 simulations |
+| **Reproducible** | Trends detected, multi-iteration validation |
+| **Safe** | Pre-control, parameter validation |
+| **Fast** | ~90 sec per audit |
+| **Scalable** | No breaking changes, compatible |
 
 ---
 
 ## 📈 Roadmap
 
-- [x] v2.3: Inteligencia del agente (COMPLETADO)
-- [ ] v2.4: Integración con sistemas ERP
-- [ ] v2.5: Dashboard histórico de auditorías
-- [ ] v3.0: Machine learning para patrones de fragilidad
+- [x] v2.3: Agent Intelligence (COMPLETED)
+- [ ] v2.4: ERP System Integration
+- [ ] v2.5: Historical Audit Dashboard
+- [ ] v3.0: Machine learning for fragility patterns
 
 ---
 
-## 🤝 Contribuir
+## 🤝 Contributing
 
-Las contribuciones son bienvenidas:
+Contributions are welcome:
 ```bash
 git clone https://github.com/RogelioAlcantarRangel/Iso-Entropy.git
-git checkout -b feature/mi-mejora
-# ... hacer cambios ...
-git push origin feature/mi-mejora
+git checkout -b feature/my-feature
+# ... make changes ...
+git push origin feature/my-feature
 ```
 
 ---
 
-## 📄 Licencia
+## 📄 License
 
-MIT License - Ver [LICENSE](LICENSE)
+MIT License - See [LICENSE](LICENSE)
 
 ---
 
-## 📞 Soporte
+## 📞 Support
 
 - **Issues:** [GitHub Issues](https://github.com/RogelioAlcantarRangel/Iso-Entropy/issues)
-- **Documentación:** [INDICE_COMPLETO.md](INDICE_COMPLETO.md)
-- **Ejemplo Real:** [CASO_USO_INNOVASTORE.md](CASO_USO_INNOVASTORE.md)
+- **Documentation:** See `docs/` folder.
+- **Real Example:** [docs/CASE_STUDY.md](docs/CASE_STUDY.md)
 
 ---
 
-## 🎉 Estado Final
+## 🎉 Final Status
 
-**ISO-ENTROPÍA v2.3 está 100% COMPLETADO y LISTO PARA PRODUCCIÓN**
+**ISO-ENTROPÍA v2.3 is 100% COMPLETED and READY FOR PRODUCTION**
 
-- ✅ Código mejorado y validado
-- ✅ Documentación completa (8+ guías)
-- ✅ Casos de uso reales
-- ✅ Garantías de calidad
-- ✅ Sincronizado con GitHub
-- ✅ Estructura de proyecto limpia y escalable
-
-**Próximo paso:** Lee [QUICK_START.md](docs/quick-start/QUICK_START.md) para empezar en 30 segundos.
+- ✅ Code improved and validated
+- ✅ Complete documentation
+- ✅ Real use cases
+- ✅ Quality guarantees
+- ✅ Synchronized with GitHub
+- ✅ Clean and scalable project structure
 
 ---
 
 *ISO-ENTROPÍA v2.3*  
-*"QUE REALMENTE FUNCIONE"*  
+*"THAT ACTUALLY WORKS"*  
 *Detect fragility. Prevent collapse. Save lives.* 🚀
