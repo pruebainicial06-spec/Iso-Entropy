@@ -299,7 +299,7 @@ if start_btn:
     # INICIALIZAR AGENTE
     try:
         agent = IsoEntropyAgent(
-            api_key=api_key if not mock_mode else None,
+            api_key=final_api_key if not mock_mode else None,
             mock_mode=mock_mode,
             verbose=verbose,
             max_iterations=max_iterations
