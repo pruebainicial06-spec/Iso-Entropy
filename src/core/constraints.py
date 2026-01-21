@@ -1,10 +1,16 @@
-# constraints.py
+# constraints.py - FIXED
 """
 Hard Rules & Physical Constraints
 =================================
 
-Este módulo implementa PRE-CONTROL.
-Nada aquí es negociable por el LLM.
+CAMBIO CRÍTICO: Ya no lanza excepción por I > 1.5*K.
+Eso es exactamente el tipo de sistema que el agente debe DIAGNOSTICAR,
+no rechazar.
+
+En su lugar:
+- Log de advertencia
+- Flag de "situación crítica"
+- Dejar que el agente intente (o determine que es irrecuperable)
 """
 
 from typing import Dict
@@ -23,11 +29,11 @@ def apply_hard_rules(
     params: Dict[str, float]
 ) -> Dict[str, float]:
     """
-    Aplica reglas físicas absolutas ANTES del razonamiento del agente.
+    Aplica reglas físicas PERO PERMITE SISTEMAS CRÍTICOS.
 
     - Ajusta parámetros inválidos
-    - Detecta colapso inevitable
-    - Nunca consulta al LLM
+    - MARCA situación crítica (no lanza excepción)
+    - Dejar que el agente diagnostique
     """
 
     I = params.get("I", 1.0)
@@ -35,6 +41,7 @@ def apply_hard_rules(
     liquidity = params.get("liquidity", 0.5)
 
     adjustments = []
+    warnings = []
 
     # ------------------------------------------------------------------
     # 1️⃣ ENTROPÍA MÍNIMA SEGÚN VOLATILIDAD
@@ -66,18 +73,26 @@ def apply_hard_rules(
     # 3️⃣ LIQUIDEZ BAJA → CRECIMIENTO DE K MÁS AGRESIVO
     # ------------------------------------------------------------------
     if liquidity < 0.5:
-        # No forzamos K aquí, pero marcamos penalización implícita
         params["low_liquidity_penalty"] = True
+        warnings.append("⚠️ Liquidez baja: ajustes de K serán menos efectivos")
 
     # ------------------------------------------------------------------
-    # 4️⃣ DETECCIÓN DE COLAPSO INEVITABLE
+    # 4️⃣ DETECCIÓN DE CRÍTICA (pero permitir)
     # ------------------------------------------------------------------
-    # Regla dura: si la entropía supera 1.5x la capacidad,
-    # no hay régimen estable posible.
-    if I > K * 1.5:
-        raise HardConstraintViolation(
-            f"Colapso inevitable: I ({I:.2f}) > 1.5 × K ({K:.2f})"
+    # CHANGE: En lugar de lanzar excepción, marcamos y prevenimos
+    if I > K * 2.0:
+        warnings.append(
+            f"⚠️ CRÍTICA ESTRUCTURAL: I ({I:.2f}) >> 2.0 × K ({K:.2f}). "
+            "El sistema está en riesgo extremo. El agente intentará diagnosticar."
         )
+        params["critical_structural_warning"] = True
+    
+    elif I > K * 1.5:
+        warnings.append(
+            f"⚠️ SITUACIÓN MARGINAL: I ({I:.2f}) > 1.5 × K ({K:.2f}). "
+            "Sistema frágil. Requiere intervención urgente."
+        )
+        params["marginal_situation"] = True
 
     # ------------------------------------------------------------------
     # 5️⃣ CLAMP FINAL ABSOLUTO
@@ -86,11 +101,19 @@ def apply_hard_rules(
     K = max(0.1, min(10.0, K))
     liquidity = max(0.0, min(1.0, liquidity))
 
+    # ------------------------------------------------------------------
+    # 6️⃣ PREVENCIÓN DE DIVISIÓN POR CERO
+    # ------------------------------------------------------------------
+    if K == 0:
+        K = 0.1
+        warnings.append("K clamped a 0.1 para prevenir división por cero")
+
     params.update({
         "I": I,
         "K": K,
         "liquidity": liquidity,
-        "adjustments": adjustments
+        "adjustments": adjustments,
+        "warnings": warnings
     })
 
     return params

@@ -293,7 +293,7 @@ class IsoEntropyAgent:
         # Construir prompt maestro con historial de experimentos
         llm_signal = build_llm_signal(self.experiment_log)
         prompt = build_prompt_for_phase(
-            phase=self.fsm.phase,
+            phase=AgentPhase.CONCLUDE,  # Forzar formato de reporte ejecutivo
             phase_reasoning=self.fsm.phase_reasoning(),
             system_description=user_input,
             llm_signal=llm_signal
@@ -313,11 +313,35 @@ PARÁMETROS FINALES DEL SISTEMA:
 - Stock Buffer: {stock:.2f} meses
 - Liquidez: {liquidity:.2f}
 
-GENERA UN REPORTE EJECUTIVO COMPLETO CON:
-1. Diagnóstico de Insolvencia Informacional
-2. Punto Crítico de Fallo
-3. Horizonte de Supervivencia
-4. 3 Acciones Mitigación Concretas
+GENERA UN REPORTE EJECUTIVO COMPLETO EN FORMATO MARKDOWN CON LA SIGUIENTE ESTRUCTURA EXACTA:
+
+### Reporte de Auditoría Forense: [Nombre del Sistema]
+
+**A la atención del Director General:**
+
+[Introducción breve sobre el propósito de la auditoría]
+
+---
+
+### 1. Diagnóstico de Insolvencia Informacional
+[Análisis detallado del ratio I/K y su significado en términos de negocio]
+
+### 2. Punto Crítico de Fallo
+[Descripción del umbral de colapso y vulnerabilidades identificadas]
+
+### 3. Horizonte de Supervivencia
+[Estimación temporal de estabilidad bajo condiciones actuales]
+
+### 4. Acciones de Mitigación Concretas
+[Lista numerada de 3 acciones específicas y accionables]
+
+---
+
+**Dictamen Final:** [Conclusión ejecutiva]
+
+---
+
+IMPORTANTE: Usa un tono profesional, explica términos técnicos en lenguaje de negocio, y asegura que el reporte sea completo y accionable.
 """
         
         # Hacer llamada a Gemini
