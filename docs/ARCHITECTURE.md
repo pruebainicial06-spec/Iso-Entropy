@@ -1,191 +1,191 @@
-# 🗂️ Estructura de Implementación - Plan Auditoría Concreta
+# 🗂️ Implementation Structure - Concrete Audit Plan
 
-## Árbol de Archivos Modificados y Documentos Generados
+## Modified File and Generated Documents Tree
 
 ```
 c:\Users\rogel\OneDrive\ISO-ENTROPY\
 │
-├── 🔧 CÓDIGO MODIFICADO
+├── 🔧 MODIFIED CODE
 │   ├── ✏️ prompt_templates.py
-│   │   └── Cambio: Formato CONCLUDE → Markdown
+│   │   └── Change: CONCLUDE Format → Markdown
 │   │
 │   ├── ✏️ agent.py
-│   │   ├── _decide_next_step()          [Detecta CONCLUDE]
-│   │   ├── audit_system()               [Mejora FSM loop]
-│   │   └── _format_experiment_table()   [Nueva función]
+│   │   ├── _decide_next_step()          [Detects CONCLUDE]
+│   │   ├── audit_system()               [Improves FSM loop]
+│   │   └── _format_experiment_table()   [New function]
 │   │
 │   └── ✏️ telemetry.py
-│       └── build_llm_signal()           [Enriquece signal]
+│       └── build_llm_signal()           [Enriches signal]
 │
-├── 📚 DOCUMENTACIÓN NUEVA
-│   ├── 📄 README_INDEX.md               [👈 EMPEZAR AQUÍ]
-│   │   └── Índice de toda la documentación
+├── 📚 NEW DOCUMENTATION
+│   ├── 📄 README_INDEX.md               [👈 START HERE]
+│   │   └── Index of all documentation
 │   │
-│   ├── 📄 EXECUTIVE_SUMMARY.md          [Para Directores/Managers]
-│   │   ├── Resumen de implementación
-│   │   ├── Estadísticas
-│   │   ├── Objetivos cumplidos
-│   │   └── Status: ✅ 100% COMPLETO
+│   ├── 📄 EXECUTIVE_SUMMARY.md          [For Directors/Managers]
+│   │   ├── Implementation summary
+│   │   ├── Statistics
+│   │   ├── Objectives met
+│   │   └── Status: ✅ 100% COMPLETE
 │   │
-│   ├── 📄 IMPLEMENTATION_SUMMARY.md     [Para Tech Leads]
-│   │   ├── Cambios por archivo
-│   │   ├── Diagrama de flujo
-│   │   ├── Validación de cambios
-│   │   └── Matriz de cambios
+│   ├── 📄 IMPLEMENTATION_SUMMARY.md     [For Tech Leads]
+│   │   ├── Changes by file
+│   │   ├── Flowchart
+│   │   ├── Change validation
+│   │   └── Change matrix
 │   │
-│   ├── 📄 TECHNICAL_DOCUMENTATION.md    [Para Ingenieros]
-│   │   ├── Cambios línea x línea
-│   │   ├── Código antes/después
-│   │   ├── Nuevas métricas
-│   │   ├── Fórmulas (deuda de entropía)
-│   │   └── Decisiones de diseño
+│   ├── 📄 TECHNICAL_DOCUMENTATION.md    [For Engineers]
+│   │   ├── Line-by-line changes
+│   │   ├── Before/after code
+│   │   ├── New metrics
+│   │   ├── Formulas (entropy debt)
+│   │   └── Design decisions
 │   │
-│   ├── 📄 TESTING_GUIDE.md              [Para QA/Testers]
-│   │   ├── Flujo de prueba
-│   │   ├── 3 casos de prueba
-│   │   ├── Puntos de verificación
+│   ├── 📄 TESTING_GUIDE.md              [For QA/Testers]
+│   │   ├── Test flow
+│   │   ├── 3 test cases
+│   │   ├── Verification points
 │   │   ├── Troubleshooting
-│   │   └── Métricas a registrar
+│   │   └── Metrics to record
 │   │
-│   ├── 📄 CHANGELOG.md                  [Para Release Notes]
-│   │   ├── v2.1 → v2.2 cambios
-│   │   ├── Nuevas funcionalidades
-│   │   ├── Comparativa
-│   │   └── Roadmap futuro
+│   ├── 📄 CHANGELOG.md                  [For Release Notes]
+│   │   ├── v2.1 → v2.2 changes
+│   │   ├── New features
+│   │   ├── Comparison
+│   │   └── Future roadmap
 │   │
-│   └── 📄 ARQUITECTURA.md               [Este documento]
-│       └── Estructura visual del proyecto
+│   └── 📄 ARCHITECTURE.md               [This document]
+│       └── Visual project structure
 │
-├── 🏗️ ARCHIVOS EXISTENTES (sin cambios)
+├── 🏗️ EXISTING FILES (no changes)
 │   ├── app.py                           [Compatible ✅]
-│   ├── fsm.py                           [Sin cambios]
-│   ├── physics.py                       [Sin cambios]
-│   ├── grounding.py                     [Sin cambios]
-│   ├── constraints.py                   [Sin cambios]
-│   ├── requirements.txt                 [Sin cambios]
-│   ├── README.md                        [Sin cambios]
-│   ├── theory.md                        [Sin cambios]
-│   └── __pycache__/                     [Sin cambios]
+│   ├── fsm.py                           [No changes]
+│   ├── physics.py                       [No changes]
+│   ├── grounding.py                     [No changes]
+│   ├── constraints.py                   [No changes]
+│   ├── requirements.txt                 [No changes]
+│   ├── README.md                        [No changes]
+│   ├── theory.md                        [No changes]
+│   └── __pycache__/                     [No changes]
 │
-└── 📋 PLANES Y REFERENCIA
+└── 📋 PLANS AND REFERENCE
     └── plans/
-        └── audit_optimization_plan.md   [Plan original ✅ COMPLETADO]
+        └── audit_optimization_plan.md   [Original plan ✅ COMPLETED]
 ```
 
 ---
 
-## 🔄 Flujo de Cambios
+## 🔄 Change Flow
 
-### Antes de la Implementación (v2.1)
+### Before Implementation (v2.1)
 
 ```
 ┌──────────────────────────────────────────────────────┐
-│                  ISO-ENTROPÍA v2.1                   │
+│                  ISO-ENTROPY v2.1                   │
 ├──────────────────────────────────────────────────────┤
 │                                                      │
 │  Prompts:                                           │
 │  └─ ORIENT/VALIDATE/STRESS → JSON Response          │
 │                                                      │
 │  Agent Loop:                                        │
-│  ├─ Generar prompt                                  │
-│  ├─ Llamar LLM                                      │
-│  ├─ Parsear JSON                                    │
-│  ├─ Ejecutar simulación                             │
-│  ├─ Actualizar FSM                                  │
-│  └─ Repetir hasta MAX_ITERATIONS                    │
+│  ├─ Generate prompt                                  │
+│  ├─ Call LLM                                      │
+│  ├─ Parse JSON                                    │
+│  ├─ Run simulation                             │
+│  ├─ Update FSM                                  │
+│  └─ Repeat until MAX_ITERATIONS                    │
 │                                                      │
-│  Telemetría:                                        │
-│  └─ Básica (K, collapse_rate)                       │
+│  Telemetry:                                        │
+│  └─ Basic (K, collapse_rate)                       │
 │                                                      │
-│  Resultado:                                         │
-│  └─ Reporte Markdown Estándar                       │
+│  Result:                                         │
+│  └─ Standard Markdown Report                       │
 │                                                      │
 └──────────────────────────────────────────────────────┘
 ```
 
-### Después de la Implementación (v2.2)
+### After Implementation (v2.2)
 
 ```
 ┌──────────────────────────────────────────────────────┐
-│                  ISO-ENTROPÍA v2.2                   │
+│                  ISO-ENTROPY v2.2                   │
 ├──────────────────────────────────────────────────────┤
 │                                                      │
 │  Prompts:                                           │
 │  ├─ ORIENT/VALIDATE/STRESS → JSON Response          │
-│  └─ CONCLUDE → Markdown Response ✨ NUEVO            │
+│  └─ CONCLUDE → Markdown Response ✨ NEW            │
 │                                                      │
 │  Agent Loop:                                        │
-│  ├─ Generar prompt (fase-específico)                │
-│  ├─ Llamar LLM                                      │
-│  ├─ Si CONCLUDE: devolver Markdown plano            │
-│  ├─ Si no: parsear JSON                             │
-│  ├─ Ejecutar simulación (si corresponde)            │
-│  ├─ Actualizar FSM                                  │
-│  └─ Si CONCLUDE: SALIR DEL LOOP ✨ NUEVO            │
+│  ├─ Generate prompt (phase-specific)                │
+│  ├─ Call LLM                                      │
+│  ├─ If CONCLUDE: return plain Markdown            │
+│  ├─ If not: parse JSON                             │
+│  ├─ Run simulation (if applicable)            │
+│  ├─ Update FSM                                  │
+│  └─ If CONCLUDE: EXIT LOOP ✨ NEW            │
 │                                                      │
-│  Auditoría Final (post-loop):                       │
-│  ├─ Si CONCLUDE: Llamada final al LLM ✨ NUEVO      │
-│  ├─ Obtener reporte Markdown forense                │
-│  └─ Integrar en resultado final                     │
+│  Final Audit (post-loop):                       │
+│  ├─ If CONCLUDE: Final call to LLM ✨ NEW      │
+│  ├─ Get forensic Markdown report                │
+│  └─ Integrate into final result                     │
 │                                                      │
-│  Telemetría:                                        │
-│  ├─ Básica (K, collapse_rate)                       │
-│  └─ Enriquecida ✨ NUEVO                            │
+│  Telemetry:                                        │
+│  ├─ Basic (K, collapse_rate)                       │
+│  └─ Enriched ✨ NEW                            │
 │     ├─ theta_max_range (H(C))                       │
 │     ├─ entropy_debt_accumulated (D_e)               │
 │     └─ last_theta_max                               │
 │                                                      │
-│  Resultado:                                         │
-│  ├─ Reporte Markdown Forense (si CONCLUDE)          │
-│  ├─ + Historial de Experimentos                     │
-│  └─ + Análisis de Fragilidad                        │
+│  Result:                                         │
+│  ├─ Forensic Markdown Report (if CONCLUDE)          │
+│  ├─ + Experiment History                     │
+│  └─ + Fragility Analysis                        │
 │                                                      │
 └──────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 📊 Matriz de Cambios Detallada
+## 📊 Detailed Change Matrix
 
 ### PROMPT_TEMPLATES.PY
 
 ```python
-# ANTES (todas las fases iguales)
+# BEFORE (all phases the same)
 if phase == AgentPhase.ORIENT:
     response_format = "JSON"
 elif phase == AgentPhase.VALIDATE:
     response_format = "JSON"
 elif phase == AgentPhase.STRESS:
     response_format = "JSON"
-# → Todo daba JSON
+# → Everything gave JSON
 
-# DESPUÉS (fase específica)
+# AFTER (specific phase)
 if phase == AgentPhase.CONCLUDE:
     response_format = "MARKDOWN"
 else:
     response_format = "JSON"
-# → CONCLUDE = Markdown, otros = JSON
+# → CONCLUDE = Markdown, others = JSON
 ```
 
-**Impacto:**
+**Impact:**
 ```
-Líneas: +16
-Complejidad: +0 (simple if/else)
-Compatibilidad: 100% (atrás compatible)
+Lines: +16
+Complexity: +0 (simple if/else)
+Compatibility: 100% (backward compatible)
 ```
 
 ---
 
 ### AGENT.PY
 
-#### Cambio 1: Detección en _decide_next_step
+#### Change 1: Detection in _decide_next_step
 
 ```python
-# ANTES
+# BEFORE
 decision = self._extract_json(response.text)
 return decision
 
-# DESPUÉS
+# AFTER
 if self.fsm.phase == AgentPhase.CONCLUDE:
     decision = {"action": "REPORT", "report_content": response.text}
 else:
@@ -193,58 +193,58 @@ else:
 return decision
 ```
 
-#### Cambio 2: Condición del while en audit_system
+#### Change 2: while condition in audit_system
 
 ```python
-# ANTES
+# BEFORE
 while iteration < MAX_ITERATIONS:
 
-# DESPUÉS
+# AFTER
 while iteration < MAX_ITERATIONS and self.fsm.phase != AgentPhase.CONCLUDE:
 ```
 
-#### Cambio 3: Manejo de transición a CONCLUDE
+#### Change 3: Handling transition to CONCLUDE
 
 ```python
-# NUEVO (dentro del loop)
+# NEW (inside the loop)
 if self.fsm.phase == AgentPhase.CONCLUDE:
-    self._log("\n🏁 FSM ha transicionado a CONCLUDE...")
+    self._log("\n🏁 FSM has transitioned to CONCLUDE...")
     break
 ```
 
-#### Cambio 4: Llamada final post-loop
+#### Change 4: Final call post-loop
 
 ```python
-# NUEVO (después del while)
+# NEW (after the while)
 if self.fsm.phase == AgentPhase.CONCLUDE:
     final_report_prompt = build_prompt_for_phase(...)
     response = self.client.models.generate_content(...)
     final_llm_report = response.text
 ```
 
-#### Cambio 5: Integración del reporte
+#### Change 5: Report integration
 
 ```python
-# ANTES
-final_report = generar_reporte_estándar()
+# BEFORE
+final_report = generate_standard_report()
 
-# DESPUÉS
+# AFTER
 if final_llm_report:
     final_report = f"""
-    # Auditoría Forense
+    # Forensic Audit
     {final_llm_report}
-    {historial_experimentos}
+    {experiment_history}
     """
 else:
-    final_report = generar_reporte_estándar()
+    final_report = generate_standard_report()
 ```
 
-**Impacto:**
+**Impact:**
 ```
-Líneas: +120
-Complejidad: +2 (if/else anidados)
-Funciones nuevas: 1 (_format_experiment_table)
-Compatibilidad: 100% (atrás compatible)
+Lines: +120
+Complexity: +2 (nested if/else)
+New functions: 1 (_format_experiment_table)
+Compatibility: 100% (backward compatible)
 ```
 
 ---
@@ -252,7 +252,7 @@ Compatibilidad: 100% (atrás compatible)
 ### TELEMETRY.PY
 
 ```python
-# ANTES
+# BEFORE
 signal = {
     "experiments": len(...),
     "min_collapse_rate": ...,
@@ -260,178 +260,178 @@ signal = {
     "k_range": "...",
 }
 
-# DESPUÉS
-# + 3 nuevas métricas
+# AFTER
+# + 3 new metrics
 signal = {
-    ...,  # Lo anterior
-    "theta_max_range": "...",              # ✨ NUEVO
-    "entropy_debt_accumulated": float,     # ✨ NUEVO
-    "last_theta_max": float,               # ✨ NUEVO
+    ...,  # The above
+    "theta_max_range": "...",              # ✨ NEW
+    "entropy_debt_accumulated": float,     # ✨ NEW
+    "last_theta_max": float,               # ✨ NEW
 }
 ```
 
-**Fórmula Agregada:**
-$$D_e = \sum_{i=1}^{n} (I_i - K_i) \cdot \text{tasa_colapso}_i$$
+**Added Formula:**
+$$D_e = \sum_{i=1}^{n} (I_i - K_i) \cdot \text{collapse_rate}_i$$
 
-**Impacto:**
+**Impact:**
 ```
-Líneas: +12
-Complejidad: +1 (nuevo bucle de cálculo)
-Métricas: +3
-Compatibilidad: 100% (atrás compatible)
+Lines: +12
+Complexity: +1 (new calculation loop)
+Metrics: +3
+Compatibility: 100% (backward compatible)
 ```
 
 ---
 
-## 🎯 Objetivos vs Implementación
+## 🎯 Objectives vs Implementation
 
-| Objetivo | Implementado | Evidencia |
+| Objective | Implemented | Evidence |
 |----------|-------------|----------|
-| Prompts específicos para CONCLUDE | ✅ SÍ | prompt_templates.py:70-94 |
-| Manejo de Markdown | ✅ SÍ | agent.py:_decide_next_step() |
-| FSM integrada | ✅ SÍ | agent.py:audit_system() loop mejorado |
-| Telemetría enriquecida | ✅ SÍ | telemetry.py:+12 líneas |
-| Reporte integrado | ✅ SÍ | agent.py: post-bucle CONCLUDE |
-| Mock mode funcional | ✅ SÍ | agent.py: is_mock_mode handling |
-| Backward compatible | ✅ SÍ | Sin breaking changes |
+| Specific prompts for CONCLUDE | ✅ YES | prompt_templates.py:70-94 |
+| Markdown handling | ✅ YES | agent.py:_decide_next_step() |
+| Integrated FSM | ✅ YES | agent.py:audit_system() improved loop |
+| Enriched telemetry | ✅ YES | telemetry.py:+12 lines |
+| Integrated report | ✅ YES | agent.py: post-loop CONCLUDE |
+| Functional mock mode | ✅ YES | agent.py: is_mock_mode handling |
+| Backward compatible | ✅ YES | No breaking changes |
 
 ---
 
-## 📈 Evolución del Código
+## 📈 Code Evolution
 
-### Tamaño de Codebase
+### Codebase Size
 
 ```
-Antes:  agent.py (≈450 líneas)
-        prompt_templates.py (≈60 líneas)
-        telemetry.py (≈55 líneas)
+Before:  agent.py (≈450 lines)
+        prompt_templates.py (≈60 lines)
+        telemetry.py (≈55 lines)
         ─────────────────────
-        TOTAL: ≈565 líneas
+        TOTAL: ≈565 lines
 
-Después: agent.py (≈570 líneas)
-        prompt_templates.py (≈111 líneas)
-        telemetry.py (≈78 líneas)
+After: agent.py (≈570 lines)
+        prompt_templates.py (≈111 lines)
+        telemetry.py (≈78 lines)
         ─────────────────────
-        TOTAL: ≈759 líneas
+        TOTAL: ≈759 lines
 
-Incremento: +194 líneas (+34%)
+Increase: +194 lines (+34%)
 ```
 
-### Documentación Generada
+### Generated Documentation
 
 ```
-Nuevo contenido:
-├── EXECUTIVE_SUMMARY.md           (≈200 líneas)
-├── IMPLEMENTATION_SUMMARY.md      (≈150 líneas)
-├── TECHNICAL_DOCUMENTATION.md     (≈300 líneas)
-├── TESTING_GUIDE.md               (≈250 líneas)
-├── CHANGELOG.md                   (≈200 líneas)
-└── README_INDEX.md                (≈150 líneas)
+New content:
+├── EXECUTIVE_SUMMARY.md           (≈200 lines)
+├── IMPLEMENTATION_SUMMARY.md      (≈150 lines)
+├── TECHNICAL_DOCUMENTATION.md     (≈300 lines)
+├── TESTING_GUIDE.md               (≈250 lines)
+├── CHANGELOG.md                   (≈200 lines)
+└── README_INDEX.md                (≈150 lines)
 ─────────────────────────────────────────
-TOTAL: ≈1,250 líneas de documentación
+TOTAL: ≈1,250 lines of documentation
 ```
 
 ---
 
-## 🔐 Validaciones Aplicadas
+## 🔐 Applied Validations
 
-### Verificación de Sintaxis
+### Syntax Verification
 ```
-✅ agent.py          - Sin errores
-✅ prompt_templates.py - Sin errores
-✅ telemetry.py      - Sin errores
+✅ agent.py          - No errors
+✅ prompt_templates.py - No errors
+✅ telemetry.py      - No errors
 ```
 
-### Compatibilidad
+### Compatibility
 ```
-✅ API Pública:         Sin breaking changes
-✅ Imports:             Todos disponibles
-✅ Dependencias:        Sin cambios
+✅ Public API:         No breaking changes
+✅ Imports:             All available
+✅ Dependencies:        No changes
 ✅ Backward compat:     100%
 ```
 
-### Integración
+### Integration
 ```
-✅ fsm.py integración:     OK
-✅ physics.py integración: OK
-✅ app.py integración:     OK
+✅ fsm.py integration:     OK
+✅ physics.py integration: OK
+✅ app.py integration:     OK
 ✅ grounding.py ref:       OK
 ```
 
 ---
 
-## 📚 Documentación por Tipo
+## 📚 Documentation by Type
 
-### Para Lectura Rápida
+### For Quick Reading
 - ✅ EXECUTIVE_SUMMARY.md (5 min)
 - ✅ CHANGELOG.md (10 min)
 
-### Para Comprensión Media
+### For Medium Understanding
 - ✅ IMPLEMENTATION_SUMMARY.md (15 min)
 - ✅ README_INDEX.md (10 min)
 
-### Para Detalle Profundo
+### For Deep Detail
 - ✅ TECHNICAL_DOCUMENTATION.md (30+ min)
 - ✅ TESTING_GUIDE.md (30+ min)
 
-### Para Referencia
-- ✅ Este documento (ARQUITECTURA.md)
+### For Reference
+- ✅ This document (ARCHITECTURE.md)
 
 ---
 
-## 🎓 Cómo Navegar la Documentación
+## 🎓 How to Navigate the Documentation
 
 ```
-¿Quién eres?          ¿Qué necesitas?           ¿Qué lees?
+Who are you?          What do you need?           What do you read?
 ─────────────────────────────────────────────────────────
-Director              Resumen rápido           EXECUTIVE_SUMMARY
-Manager               Estado general           EXECUTIVE_SUMMARY
-Product Manager       Qué es CONCLUDE          README_INDEX
+Director              Quick summary           EXECUTIVE_SUMMARY
+Manager               General status           EXECUTIVE_SUMMARY
+Product Manager       What is CONCLUDE          README_INDEX
 ─────────────────────────────────────────────────────────
-Tech Lead             Cómo se implementó       IMPLEMENTATION_SUMMARY
-Arquitecto            Decisiones de diseño     TECHNICAL_DOCUMENTATION
+Tech Lead             How it was implemented       IMPLEMENTATION_SUMMARY
+Architect            Design decisions     TECHNICAL_DOCUMENTATION
 ─────────────────────────────────────────────────────────
-Developer             Código específico        TECHNICAL_DOCUMENTATION
-Backend Engineer      Cambios línea x línea    TECHNICAL_DOCUMENTATION
+Developer             Specific code        TECHNICAL_DOCUMENTATION
+Backend Engineer      Line-by-line changes    TECHNICAL_DOCUMENTATION
 ─────────────────────────────────────────────────────────
-QA Engineer           Cómo probar              TESTING_GUIDE
-Tester                Casos de prueba          TESTING_GUIDE
+QA Engineer           How to test              TESTING_GUIDE
+Tester                Test cases          TESTING_GUIDE
 ─────────────────────────────────────────────────────────
-DevOps                Cambios de deploy        CHANGELOG
+DevOps                Deployment changes        CHANGELOG
 Release Manager       Versioning               CHANGELOG
 ─────────────────────────────────────────────────────────
-Nuevo usuario         Dónde empezar            README_INDEX
-Cualquiera            Estructura general       Este documento
+New user         Where to start            README_INDEX
+Anyone            General structure       This document
 ```
 
 ---
 
-## ✅ Checklist Final
+## ✅ Final Checklist
 
-- [x] Código modificado compilable
-- [x] Sintaxis Python correcta
+- [x] Modified code is compilable
+- [x] Correct Python syntax
 - [x] Backward compatible
-- [x] Documentación completada
-- [x] Diagrama de flujo actualizado
-- [x] Guía de testing disponible
-- [x] Ejemplos de código incluidos
-- [x] FAQ respondidas
-- [x] Roadmap definido
-- [x] Status claro: LISTO PARA PRODUCCIÓN
+- [x] Documentation completed
+- [x] Flowchart updated
+- [x] Testing guide available
+- [x] Code examples included
+- [x] FAQ answered
+- [x] Roadmap defined
+- [x] Clear status: READY FOR PRODUCTION
 
 ---
 
-## 📞 Información de Contacto
+## 📞 Contact Information
 
-**Implementación realizada por:** GitHub Copilot  
-**Fecha:** 15 de enero de 2026  
-**Versión:** ISO-ENTROPÍA 2.2
+**Implementation by:** GitHub Copilot  
+**Date:** January 15, 2026  
+**Version:** ISO-ENTROPY 2.2
 
-**Para soporte:**
-- Detalles técnicos → TECHNICAL_DOCUMENTATION.md
-- Cómo probar → TESTING_GUIDE.md
-- Entender cambios → IMPLEMENTATION_SUMMARY.md
+**For support:**
+- Technical details → TECHNICAL_DOCUMENTATION.md
+- How to test → TESTING_GUIDE.md
+- Understand changes → IMPLEMENTATION_SUMMARY.md
 
 ---
 
-**Fin de Arquitectura.md**
+**End of Architecture.md**
