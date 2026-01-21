@@ -8,7 +8,7 @@ from datetime import datetime
 from typing import Optional, Dict, Any, List
 from dotenv import load_dotenv
 
-# ✓ IMPORTACIÓN CORRECTA (google-genai)
+# ✓ CORRECT IMPORT (google-genai)
 from google import genai
 
 from .physics import run_simulation, calculate_collapse_threshold
@@ -22,49 +22,49 @@ load_dotenv()
 
 
 # ============================================================================
-# RATE LIMITER - Respeta 5 RPM
+# RATE LIMITER - Respects 5 RPM
 # ============================================================================
 
 class RateLimiter:
-    """Maneja rate limit de 5 RPM para Gemini."""
+    """Handles 5 RPM rate limit for Gemini."""
     
     def __init__(self, max_rpm: int = 5):
         self.max_rpm = max_rpm
-        self.min_interval = 60.0 / max_rpm  # 12 segundos
+        self.min_interval = 60.0 / max_rpm  # 12 seconds
         self.request_timestamps = []
         self.total_requests = 0
     
     def wait_if_needed(self, verbose: bool = True) -> float:
-        """Espera si es necesario para respetar 5 RPM."""
+        """Waits if necessary to respect 5 RPM."""
         now = time.time()
         
-        # Limpiar timestamps viejos (fuera de ventana de 60 segundos)
+        # Clean up old timestamps (outside 60-second window)
         self.request_timestamps = [
             ts for ts in self.request_timestamps 
             if now - ts < 60.0
         ]
         
-        # Si hay 5 requests en la ventana, esperar
+        # If there are 5 requests in the window, wait
         if len(self.request_timestamps) >= self.max_rpm:
             oldest = self.request_timestamps[0]
             wait_time = 60.0 - (now - oldest) + 0.5
             if verbose:
-                print(f"⏳ Rate limit (5 RPM): esperando {wait_time:.1f}s")
+                print(f"⏳ Rate limit (5 RPM): waiting {wait_time:.1f}s")
             time.sleep(wait_time)
             now = time.time()
         
-        # Asegurar intervalo mínimo
+        # Ensure minimum interval
         if self.request_timestamps:
             last = self.request_timestamps[-1]
             elapsed = now - last
             if elapsed < self.min_interval:
                 wait_time = self.min_interval - elapsed
                 if verbose:
-                    print(f"⏳ Intervalo mínimo: esperando {wait_time:.1f}s")
+                    print(f"⏳ Minimum interval: waiting {wait_time:.1f}s")
                 time.sleep(wait_time)
                 now = time.time()
         
-        # Registrar request
+        # Register request
         self.request_timestamps.append(now)
         self.total_requests += 1
         
@@ -72,17 +72,17 @@ class RateLimiter:
 
 
 # ============================================================================
-# AUDITOR AUTÓNOMO PRINCIPAL
+# MAIN AUTONOMOUS AUDITOR
 # ============================================================================
 
 class IsoEntropyAgent:
     """
-    Auditor Autónomo con FSM completa.
+    Autonomous Auditor with complete FSM.
     - FSM: ORIENT → VALIDATE → STRESS → CONCLUDE
-    - Loops inteligentes ajustando K
-    - Simulación Monte Carlo (500 runs)
-    - Function calling a Gemini
-    - Rate limit respetado
+    - Smart loops adjusting K
+    - Monte Carlo simulation (500 runs)
+    - Function calling to Gemini
+    - Rate limit respected
     """
     
     def __init__(
@@ -98,15 +98,15 @@ class IsoEntropyAgent:
         self.max_iterations = max_iterations
         
         if not self.mock_mode and not self.api_key:
-            raise ValueError("❌ GEMINI_API_KEY no encontrada")
+            raise ValueError("❌ GEMINI_API_KEY not found")
         
         if not self.mock_mode:
-            # ✓ INICIALIZACIÓN CORRECTA (google-genai)
+            # ✓ CORRECT INITIALIZATION (google-genai)
             self.client = genai.Client(api_key=self.api_key)
         else:
             self.client = None
         
-        # Estado del agente
+        # Agent state
         self.fsm = IsoEntropyFSM()
         self.experiment_log: List[Dict[str, Any]] = []
         self.rate_limiter = RateLimiter(max_rpm=5)
@@ -116,13 +116,13 @@ class IsoEntropyAgent:
         if self.verbose:
             print(message)
     
-    def _get_cache_key(self, user_input: str, volatilidad: str, rigidez: str) -> str:
-        """Clave de cache."""
-        key = f"{user_input}|{volatilidad}|{rigidez}"
+    def _get_cache_key(self, user_input: str, volatility: str, rigidity: str) -> str:
+        """Cache key."""
+        key = f"{user_input}|{volatility}|{rigidity}"
         return hashlib.md5(key.encode()).hexdigest()
     
     def _calculate_wilson_upper_bound(self, collapses: int, runs: int) -> float:
-        """Calcula límite superior intervalo Wilson (95%)."""
+        """Calculates Wilson score interval upper bound (95%)."""
         if runs == 0:
             return 1.0
         
@@ -136,74 +136,74 @@ class IsoEntropyAgent:
         return min(1.0, upper)
     
     # ========================================================================
-    # PASO 1: GROUND INPUTS (Cálculo local)
+    # STEP 1: GROUND INPUTS (Local Calculation)
     # ========================================================================
     
     def _ground_inputs_and_validate(
         self,
         user_input: str,
-        volatilidad: str,
-        rigidez: str,
-        colchon: int
+        volatility: str,
+        rigidity: str,
+        buffer: int
     ) -> Dict[str, float]:
-        """Calcula parámetros localmente y aplica hard rules."""
+        """Calculates parameters locally and applies hard rules."""
         
         self._log("\n" + "="*70)
-        self._log("🚀 AUDITORÍA AUTÓNOMA ISO-ENTROPY")
+        self._log("🚀 ISO-ENTROPY AUTONOMOUS AUDIT")
         self._log("="*70)
         
         # 1. Ground inputs
-        params = ground_inputs(volatilidad, rigidez, colchon)
-        self._log(f"📊 Parámetros iniciales: I={params['I']:.2f}, K={params['K0']:.2f}")
+        params = ground_inputs(volatility, rigidity, buffer)
+        self._log(f"📊 Initial parameters: I={params['I']:.2f}, K={params['K0']:.2f}")
         
-        # 2. Calcular theta_max
+        # 2. Calculate theta_max
         theta_max = calculate_collapse_threshold(
             params['stock'],
             params['capital'],
             params['liquidity']
         )
         params['theta_max'] = theta_max
-        self._log(f"📊 Umbral colapso: θ_max={theta_max:.2f}")
+        self._log(f"📊 Collapse threshold: θ_max={theta_max:.2f}")
         
-        # 3. Aplicar hard rules
+        # 3. Apply hard rules
         try:
             apply_hard_rules(
-                volatilidad=volatilidad,
-                rigidez=rigidez,
-                colchon_meses=colchon,
+                volatility=volatility,
+                rigidity=rigidity,
+                buffer_months=buffer,
                 params=params
             )
-            self._log("✅ Hard rules aplicadas")
+            self._log("✅ Hard rules applied")
         except HardConstraintViolation as e:
-            self._log(f"🚫 Violación de constraint: {e}")
+            self._log(f"🚫 Constraint violation: {e}")
             raise
         
         return params
     
     # ========================================================================
-    # PASO 2: LOOP PRINCIPAL CON FSM
+    # STEP 2: MAIN LOOP WITH FSM
     # ========================================================================
     
     def audit_system(
         self,
         user_input: str,
-        volatilidad: str,
-        rigidez: str,
-        colchon: int
+        volatility: str,
+        rigidity: str,
+        buffer: int
     ) -> str:
         """
-        Auditoría completa con FSM y loops.
+        Complete audit with FSM and loops.
         """
         
-        # Verificar cache
-        cache_key = self._get_cache_key(user_input, volatilidad, rigidez)
+        # Check cache
+        cache_key = self._get_cache_key(user_input, volatility, rigidity)
         if cache_key in self.cache:
-            self._log("✅ Reporte obtenido del cache")
+            self._log("✅ Report retrieved from cache")
             return self.cache[cache_key]
         
         # Ground inputs
         physical_params = self._ground_inputs_and_validate(
-            user_input, volatilidad, rigidez, colchon
+            user_input, volatility, rigidity, buffer
         )
         
         I = physical_params['I']
@@ -223,7 +223,7 @@ class IsoEntropyAgent:
             return report
         
         # ====================================================================
-        # LOOP PRINCIPAL: ORIENT → VALIDATE → STRESS → CONCLUDE
+        # MAIN LOOP: ORIENT → VALIDATE → STRESS → CONCLUDE
         # ====================================================================
         
         current_K = K_base
@@ -231,135 +231,137 @@ class IsoEntropyAgent:
         
         while iteration < self.max_iterations:
             iteration += 1
-            self._log(f"\n📍 Iteración {iteration}/{self.max_iterations} - Fase: {self.fsm.phase_name()}")
+            self._log(f"\n📍 Iteration {iteration}/{self.max_iterations} - Phase: {self.fsm.phase_name()}")
             
-            # 1. Ejecutar simulación
-            self._log(f"🔬 Simulando: I={I:.2f}, K={current_K:.2f}, θ_max={theta_max:.2f}")
+            # 1. Run simulation
+            self._log(f"🔬 Simulating: I={I:.2f}, K={current_K:.2f}, θ_max={theta_max:.2f}")
             
             sim_result = run_simulation(I, current_K, theta_max, runs=500)
-            collapse_rate = sim_result['tasa_de_colapso']
-            collapses = sim_result.get('collapses_total', int(collapse_rate * 500))
+            collapse_rate = sim_result['collapse_rate']
+            collapses = sim_result.get('total_collapses', int(collapse_rate * 500))
             ub95 = self._calculate_wilson_upper_bound(collapses, 500)
             
-            self._log(f"📊 Resultado: Colapso={collapse_rate:.1%}, UB95={ub95:.1%}")
+            self._log(f"📊 Result: Collapse={collapse_rate:.1%}, UB95={ub95:.1%}")
             
-            # 2. Registrar experimento
+            # 2. Log experiment
             self.experiment_log.append({
-                'ciclo': iteration,
-                'fase': self.fsm.phase_name(),
-                'hipotesis': {'I': I, 'K': current_K},
-                'resultado': {
-                    'tasa_de_colapso': collapse_rate,
+                'cycle': iteration,
+                'phase': self.fsm.phase_name(),
+                'hypothesis': {'I': I, 'K': current_K},
+                'result': {
+                    'collapse_rate': collapse_rate,
                     'upper_ci95': ub95,
-                    'collapses_total': collapses,
-                    'runs': 500
+                    'total_collapses': collapses,
+                    'runs': 500,
+                    'trajectory': sim_result.get('trajectory', [])
                 }
             })
             
-            # 3. Actualizar FSM
+            # 3. Update FSM
             self.fsm.update(collapse_rate, ub95)
-            self._log(f"🔄 FSM actualizada → {self.fsm.phase_name()}")
+            self._log(f"🔄 FSM updated → {self.fsm.phase_name()}")
             
-            # 4. Decisión basada en fase
+            # 4. Phase-based decision
             if self.fsm.phase == AgentPhase.CONCLUDE:
-                self._log("✅ Pasamos a CONCLUDE - Generando reporte final")
+                self._log("✅ Moving to CONCLUDE - Generating final report")
                 break
             
             elif self.fsm.phase == AgentPhase.ORIENT:
-                # Ajustar K para encontrar estabilidad
+                # Adjust K to find stability
                 if collapse_rate < 0.05:
-                    self._log("✅ Estabilidad encontrada en ORIENT")
-                    current_K = current_K  # Mantener K
+                    self._log("✅ Stability found in ORIENT")
+                    current_K = current_K  # Maintain K
                 else:
-                    # Incrementar K
+                    # Increase K
                     delta_k = 0.2 if collapse_rate > 0.5 else 0.1
                     current_K = min(current_K + delta_k, 10.0)
-                    self._log(f"📈 Incrementando K a {current_K:.2f}")
+                    self._log(f"📈 Increasing K to {current_K:.2f}")
             
             elif self.fsm.phase == AgentPhase.VALIDATE:
-                # Confirmar reproducibilidad
-                self._log("✓ En fase VALIDATE")
+                # Confirm reproducibility
+                self._log("✓ In VALIDATE phase")
             
             elif self.fsm.phase == AgentPhase.STRESS:
-                # Mantener K constante
-                self._log("⚠️ En fase STRESS (K constante)")
+                # Keep K constant
+                self._log("⚠️ In STRESS phase (K constant)")
         
         # ====================================================================
-        # GENERAR REPORTE FINAL CON GEMINI
+        # GENERATE FINAL REPORT WITH GEMINI
         # ====================================================================
         
-        self._log("\n📝 Generando reporte final con Gemini...")
+        self._log("\n📝 Generating final report with Gemini...")
         
-        # Construir prompt maestro con historial de experimentos
+        # Build master prompt with experiment history
         llm_signal = build_llm_signal(self.experiment_log)
         prompt = build_prompt_for_phase(
-            phase=AgentPhase.CONCLUDE,  # Forzar formato de reporte ejecutivo
+            phase=AgentPhase.CONCLUDE,  # Force executive report format
             phase_reasoning=self.fsm.phase_reasoning(),
             system_description=user_input,
             llm_signal=llm_signal
         )
         
-        # Agregar instrucciones finales
+        # Add final instructions
         final_prompt = f"""{prompt}
 
-HISTORIAL DE EXPERIMENTOS REALIZADOS:
+HISTORY OF EXPERIMENTS PERFORMED:
 {json.dumps(self.experiment_log, indent=2)}
 
-PARÁMETROS FINALES DEL SISTEMA:
-- Entropía Externa (I): {I:.2f} bits
-- Capacidad Óptima (K): {current_K:.2f} bits
-- Ratio I/K: {I/current_K:.2f}
-- Umbral Colapso: {theta_max:.2f} bits
-- Stock Buffer: {stock:.2f} meses
-- Liquidez: {liquidity:.2f}
+FINAL SYSTEM PARAMETERS:
+- External Entropy (I): {I:.2f} bits
+- Optimal Capacity (K): {current_K:.2f} bits
+- I/K Ratio: {I/current_K:.2f}
+- Collapse Threshold: {theta_max:.2f} bits
+- Stock Buffer: {stock:.2f} months
+- Liquidity: {liquidity:.2f}
 
-GENERA UN REPORTE EJECUTIVO COMPLETO EN FORMATO MARKDOWN CON LA SIGUIENTE ESTRUCTURA EXACTA:
+GENERATE A COMPLETE EXECUTIVE REPORT IN MARKDOWN FORMAT WITH THE FOLLOWING EXACT STRUCTURE:
 
-### Reporte de Auditoría Forense: [Nombre del Sistema]
+### Forensic Audit Report: [System Name]
 
-**A la atención del Director General:**
+**To the attention of the CEO:**
 
-[Introducción breve sobre el propósito de la auditoría]
-
----
-
-### 1. Diagnóstico de Insolvencia Informacional
-[Análisis detallado del ratio I/K y su significado en términos de negocio]
-
-### 2. Punto Crítico de Fallo
-[Descripción del umbral de colapso y vulnerabilidades identificadas]
-
-### 3. Horizonte de Supervivencia
-[Estimación temporal de estabilidad bajo condiciones actuales]
-
-### 4. Acciones de Mitigación Concretas
-[Lista numerada de 3 acciones específicas y accionables]
+[Brief introduction on the purpose of the audit]
 
 ---
 
-**Dictamen Final:** [Conclusión ejecutiva]
+### 1. Diagnosis of Informational Insolvency
+[Detailed analysis of the I/K ratio and its meaning in business terms]
+
+### 2. Critical Failure Point
+[Description of the collapse threshold and identified vulnerabilities]
+
+### 3. Survival Horizon
+[Temporal estimation of stability under current conditions]
+
+### 4. Concrete Mitigation Actions
+[Numbered list of 3 specific and actionable actions]
 
 ---
 
-IMPORTANTE: Usa un tono profesional, explica términos técnicos en lenguaje de negocio, y asegura que el reporte sea completo y accionable.
+**Final Verdict:** [Executive conclusion]
+
+---
+
+IMPORTANT: Use a professional tone, explain technical terms in business language, and ensure the report is complete and actionable.
 """
         
-        # Hacer llamada a Gemini
+        # Make Gemini call
         self.rate_limiter.wait_if_needed()
-        
+
         try:
+            model = "gemini-3-pro-preview" if self.fsm.phase == AgentPhase.CONCLUDE else "gemini-3-flash-preview"
             response = self.client.models.generate_content(
-                model="gemini-3-flash-preview",
+                model=model,
                 contents=final_prompt
             )
             
-            report = f"""# 🎯 Auditoría Forense - ISO-ENTROPÍA
+            report = f"""# 🎯 Forensic Audit - ISO-ENTROPY
 
-## 📊 Contexto de Ejecución
-- **Sistema Analizado:** {volatilidad} volatilidad, {rigidez} rigidez, {colchon} meses colchón
-- **Experimentos Realizados:** {len(self.experiment_log)}
-- **Parámetros Finales:** I={I:.2f}, K={current_K:.2f}, θ_max={theta_max:.2f}
-- **Fase Final:** {self.fsm.phase_name()}
+## 📊 Execution Context
+- **Analyzed System:** {volatility} volatility, {rigidity} rigidity, {buffer} months buffer
+- **Experiments Performed:** {len(self.experiment_log)}
+- **Final Parameters:** I={I:.2f}, K={current_K:.2f}, θ_max={theta_max:.2f}
+- **Final Phase:** {self.fsm.phase_name()}
 
 ---
 
@@ -367,38 +369,38 @@ IMPORTANTE: Usa un tono profesional, explica términos técnicos en lenguaje de 
 
 ---
 
-## 📈 Historial de Experimentos
+## 📈 Experiment History
 
-| Ciclo | Fase | K (bits) | Colapso (%) | UB95 (%) |
+| Cycle | Phase | K (bits) | Collapse (%) | UB95 (%) |
 |-------|------|----------|-------------|----------|
 """
             
             for exp in self.experiment_log:
-                k = exp['hipotesis']['K']
-                colapso = exp['resultado']['tasa_de_colapso']
-                ub = exp['resultado']['upper_ci95']
-                fase = exp['fase']
-                report += f"| {exp['ciclo']} | {fase} | {k:.2f} | {colapso:.1%} | {ub:.1%} |\n"
+                k = exp['hypothesis']['K']
+                collapse = exp['result']['collapse_rate']
+                ub = exp['result']['upper_ci95']
+                phase = exp['phase']
+                report += f"| {exp['cycle']} | {phase} | {k:.2f} | {collapse:.1%} | {ub:.1%} |\n"
             
             report += f"""
 ---
-*Generado por Iso-Entropy Agent v2.3*
+*Generated by Iso-Entropy Agent v2.3*
 *{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}*
 """
             
-            # Cachear resultado
+            # Cache result
             self.cache[cache_key] = report
             
-            self._log("✅ Auditoría completada exitosamente")
+            self._log("✅ Audit completed successfully")
             return report
         
         except Exception as e:
             error_str = str(e)
-            self._log(f"❌ Error en Gemini: {error_str[:100]}")
+            self._log(f"❌ Gemini Error: {error_str[:100]}")
             
-            # Fallback a mock si quota agotada
+            # Fallback to mock if quota exhausted
             if "429" in error_str or "RESOURCE_EXHAUSTED" in error_str:
-                self._log("💾 Quota agotada. Generando mock report...")
+                self._log("💾 Quota exhausted. Generating mock report...")
                 report = self._generate_mock_report(
                     user_input, I, current_K, theta_max, stock, liquidity, capital
                 )
@@ -408,7 +410,7 @@ IMPORTANTE: Usa un tono profesional, explica términos técnicos en lenguaje de 
                 raise
     
     # ========================================================================
-    # GENERADOR DE MOCK REPORT
+    # MOCK REPORT GENERATOR
     # ========================================================================
     
     def _generate_mock_report(
@@ -421,71 +423,71 @@ IMPORTANTE: Usa un tono profesional, explica términos técnicos en lenguaje de 
         liquidity: float,
         capital: float
     ) -> str:
-        """Genera reporte mock cuando API no disponible."""
+        """Generates a mock report when the API is unavailable."""
         
         ratio = I / K if K > 0 else float('inf')
         
         if ratio > 5:
-            estado = "🔴 CRÍTICO"
-            diagnostico = f"Sistema en colapso informacional. I/K = {ratio:.2f}"
-            horizonte = "7-14 días"
+            status = "🔴 CRITICAL"
+            diagnosis = f"System in informational collapse. I/K = {ratio:.2f}"
+            horizon = "7-14 days"
         elif ratio > 2:
-            estado = "🟠 MARGINAL"
-            diagnostico = f"Sistema frágil. I/K = {ratio:.2f}"
-            horizonte = "30-60 días"
+            status = "🟠 MARGINAL"
+            diagnosis = f"Fragile system. I/K = {ratio:.2f}"
+            horizon = "30-60 days"
         else:
-            estado = "🟢 ESTABLE"
-            diagnostico = f"Sistema robusto. I/K = {ratio:.2f}"
-            horizonte = "6+ meses"
+            status = "🟢 STABLE"
+            diagnosis = f"Robust system. I/K = {ratio:.2f}"
+            horizon = "6+ months"
         
-        return f"""# 🎯 Auditoría Forense - ISO-ENTROPÍA
+        return f"""# 🎯 Forensic Audit - ISO-ENTROPY
 
-**Estado: {estado}**
+**Status: {status}**
 
-## 📋 Resumen Ejecutivo
-Sistema bajo análisis con parámetros: I={I:.2f} bits (Entropía), K={K:.2f} bits (Capacidad).
+## 📋 Executive Summary
+System under analysis with parameters: I={I:.2f} bits (Entropy), K={K:.2f} bits (Capacity).
 
-## 🔍 Diagnóstico de Insolvencia Informacional
+## 🔍 Diagnosis of Informational Insolvency
 
-**Ratio I/K: {ratio:.2f}**
+**I/K Ratio: {ratio:.2f}**
 
-{diagnostico}
+{diagnosis}
 
-## ⚠️ Punto Crítico de Fallo Estructural
+## ⚠️ Structural Critical Failure Point
 
-El sistema colapsa cuando deuda de entropía ≥ {theta_max:.2f} bits.
+The system collapses when entropy debt ≥ {theta_max:.2f} bits.
 
-Factores limitantes:
-- Entropía externa (I): {I:.2f} bits
-- Capacidad de respuesta (K): {K:.2f} bits
-- Buffer disponible (Stock): {stock:.2f} meses
-- Liquidez: {liquidity:.2f}
+Limiting factors:
+- External Entropy (I): {I:.2f} bits
+- Response Capacity (K): {K:.2f} bits
+- Available Buffer (Stock): {stock:.2f} months
+- Liquidity: {liquidity:.2f}
 
-## ⏱️ Horizonte de Supervivencia
+## ⏱️ Survival Horizon
 
-**{horizonte}** sin intervención correctiva.
+**{horizon}** without corrective intervention.
 
-## 🛡️ Mitigación Estratégica
+## 🛡️ Strategic Mitigation
 
-### Acción 1: Aumentar Capacidad (K)
-- Automatizar procesos manuales
-- Timeline: 4-6 semanas
-- Inversión: $50K-150K
-- Impacto: Reducir I/K en 20-30%
+### Action 1: Increase Capacity (K)
+- Automate manual processes
+- Timeline: 4-6 weeks
+- Investment: $50K-150K
+- Impact: Reduce I/K by 20-30%
 
-### Acción 2: Reducir Volatilidad (I)
-- Diversificar ingresos/servicios
-- Timeline: 2-3 meses
-- Inversión: $100K-300K
-- Impacto: Estabilizar mercado 15-25%
+### Action 2: Reduce Volatility (I)
+- Diversify revenue/services
+- Timeline: 2-3 months
+- Investment: $100K-300K
+- Impact: Stabilize market by 15-25%
 
-### Acción 3: Fortalecer Buffer
-- Línea de crédito emergencia
-- Timeline: Inmediato (2-3 semanas)
-- Inversión: Bajo (0% si no utilizada)
-- Impacto: +60% horizonte supervivencia
+### Action 3: Strengthen Buffer
+- Emergency credit line
+- Timeline: Immediate (2-3 weeks)
+- Investment: Low (0% if not used)
+- Impact: +60% survival horizon
 
 ---
-*Generado en Mock Mode*
+*Generated in Mock Mode*
 *{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}*
 """
