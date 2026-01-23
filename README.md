@@ -172,17 +172,14 @@ ISO-ENTROPY/
 │   │   └── __init__.py
 │   ├── ui/                      # Streamlit Interface
 │   │   ├── app.py              # Main application
-│   │   ├── .gitignore          # UI-specific ignores
 │   │   └── __init__.py
 │   └── __init__.py
 ├── docs/                        # Documentation
-│   ├── ARCHITECTURE.md         # System design
 │   ├── CASE_STUDY.md           # Real world example
 │   ├── CONCEPT.md              # Theoretical concept
 │   ├── TESTING_GUIDE.md        # QA Guide
-│   ├── THEORY.md               # Mathematical basis
-│   ├── Iso-Entropy demo - Rogelio Alcantar Rangel - Gemini 3 Hackathon.mp4 # Demo video
-│   └── TESTING_GUIDE.md        # QA Guide
+│   └── THEORY.md               # Mathematical basis
+│   
 ├── .env.example                # Environment template
 ├── requirements.txt            # Python dependencies
 ├── .gitignore                  # Git ignore rules
